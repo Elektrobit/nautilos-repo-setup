@@ -26,7 +26,7 @@ install -D -m 600 nautilos-repo-setup/ebcl \
     %{buildroot}/root/.ebcl
 install -D -m 755 nautilos-repo-setup/ebcl-repo-setup \
     %{buildroot}/usr/bin/ebcl-repo-setup
-install -D -m 644 nautilos-repo-setup/ebcl-sync \
+install -D -m 755 nautilos-repo-setup/ebcl-sync \
     %{buildroot}/usr/bin/ebcl-sync
 
 %files
