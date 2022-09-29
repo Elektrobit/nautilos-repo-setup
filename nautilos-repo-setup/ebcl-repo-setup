@@ -1,0 +1,82 @@
+#!/bin/bash
+
+set -e
+
+ARGUMENT_LIST=(
+    "user:"
+    "password:"
+    "no-init"
+)
+
+# read arguments
+if ! opts=$(getopt \
+    --longoptions "$(printf "%s," "${ARGUMENT_LIST[@]}")" \
+    --name "$(basename "$0")" \
+    --options "" \
+    -- "$@"
+); then
+    echo "ebcl-repo-setup"
+    echo "  --user"
+    echo "      Artifactory user name"
+    echo "  --password"
+    echo "      Artifactory password"
+    echo "  --no-init"
+    echo "      Setup environment but do not create"
+    echo "      apt repos and cache"
+    exit 1
+fi
+
+eval set --"${opts}"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --user)
+            argUser=$2
+            shift 2
+            ;;
+
+        --password)
+            argPass=$2
+            shift 2
+            ;;
+
+        --no-init)
+            argNoInit=1
+            shift
+            ;;
+
+        *)
+            break
+            ;;
+    esac
+done
+
+if [ ! -e "${HOME}/.ebcl" ];then
+    echo "${HOME}/.ebcl environment file not found"
+    exit 1
+fi
+
+if [ -n "${argUser}" ] && [ -n "${argPass}" ];then
+    echo "Updating credentials in ~/.ebcl"
+    sed -i -es"@__USER__@${argUser}@" ~/.ebcl
+    sed -i -es"@__PASS__@${argPass}@" ~/.ebcl
+fi
+
+if [ -z "${argNoInit}" ];then
+    # shellcheck source=/dev/null
+    source "${HOME}/.ebcl"
+
+    echo "Setup EBCL repositories..."
+    clean_repo
+
+    init_auth
+
+    # NautilOS development repositories
+    add_repo devel/containers
+    add_repo devel/xUbuntu_22.04_debbuild
+
+    # NautilOS release repositories
+    add_repo release/xUbuntu_22.04_debbuild
+
+    apt-get update
+fi
