@@ -5,6 +5,7 @@ set -e
 
 ARGUMENT_LIST=(
     "user:"
+    "password:"
 )
 
 LOCAL="/var/tmp/nautilos"
@@ -21,6 +22,8 @@ if ! opts=$(getopt \
     echo "ebcl-sync"
     echo "  --user"
     echo "      Artifactory User Name"
+    echo "  --password"
+    echo "      User password"
     exit 1
 fi
 
@@ -30,6 +33,11 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --user)
             argUser=$2
+            shift 2
+            ;;
+
+        --password)
+            argPass=$2
             shift 2
             ;;
 
@@ -44,10 +52,16 @@ if [ -z "${argUser}" ];then
     exit 1
 fi
 
+credentials="--ask-password"
+if [ -n "${argPass}" ];then
+    credentials="--password ${argPass}"
+fi
+
 mkdir -p "${LOCAL}"
 pushd "${LOCAL}"
 
-wget --user "${argUser}" --ask-password \
+# shellcheck disable=SC2086
+wget --user "${argUser}" ${credentials} \
     --mirror --recursive --no-parent --convert-links "${RELEASE}"
 
 find . -name index.html -0 | xargs rm -f
