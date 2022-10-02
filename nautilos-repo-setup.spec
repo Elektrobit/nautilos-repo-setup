@@ -28,10 +28,15 @@ install -D -m 755 nautilos-repo-setup/ebcl-repo-setup \
     %{buildroot}/usr/bin/ebcl-repo-setup
 install -D -m 755 nautilos-repo-setup/ebcl-sync \
     %{buildroot}/usr/bin/ebcl-sync
+install -D -m 644 nautilos-repo-setup/sib_user_guide.html \
+    %{buildroot}/usr/share/doc/packages/nautilos-repo-setup/sib_user_guide.html
+install -D -m 644 nautilos-repo-setup/sib_user_guide.pdf \
+    %{buildroot}/usr/share/doc/packages/nautilos-repo-setup/sib_user_guide.pdf
 
 %files
 %defattr(-,root,root,-)
 /root/.ebcl
+%{_usr}/share/doc/packages/nautilos-repo-setup
 %{_usr}/bin/ebcl-repo-setup
 %{_usr}/bin/ebcl-sync
 
