@@ -1,15 +1,11 @@
+#!/bin/bash
 # NautilOS profile environment
 
 A_USER=__USER__
 A_SECRET=__PASS__
 
-# Test Artifactory
-A_MACHINE=test-artifactory.elektrobit.com
-A_DIST=eblinux_nautilos2.0_debian_remote
-
-# Production Artifactory
-#A_MACHINE=artifactory.elektrobit.com
-#A_DIST=eb_corbos_linux_nautilos2.0-debian-remote
+A_MACHINE=artifactory.elektrobit.com
+A_DIST=eb_corbos_linux_nautilos2.0-debian-remote
 
 A_REPO_SERVER=https://$A_USER:$A_SECRET@$A_MACHINE/$A_DIST
 

@@ -22,8 +22,12 @@ make use of it
 %setup -q
 
 %install
-install -D -m 600 nautilos-repo-setup/ebcl \
-    %{buildroot}/root/.ebcl
+install -D -m 600 nautilos-repo-setup/ebcl.production \
+    %{buildroot}/root/.ebcl.production
+install -D -m 600 nautilos-repo-setup/ebcl.test \
+    %{buildroot}/root/.ebcl.test
+install -D -m 600 nautilos-repo-setup/ebcl.local \
+    %{buildroot}/root/.ebcl.local
 install -D -m 755 nautilos-repo-setup/ebcl-repo-setup \
     %{buildroot}/usr/bin/ebcl-repo-setup
 install -D -m 755 nautilos-repo-setup/ebcl-sync \
@@ -35,7 +39,9 @@ install -D -m 644 nautilos-repo-setup/sib_user_guide.pdf \
 
 %files
 %defattr(-,root,root,-)
-/root/.ebcl
+/root/.ebcl.production
+/root/.ebcl.test
+/root/.ebcl.local
 %{_usr}/share/doc/nautilos-repo-setup
 %{_usr}/bin/ebcl-repo-setup
 %{_usr}/bin/ebcl-sync

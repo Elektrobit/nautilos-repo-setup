@@ -1,0 +1,33 @@
+#!/bin/bash
+# NautilOS profile environment
+
+A_DIST=__DISTPATH__
+
+A_REPO_SERVER=dir://$A_DIST
+
+function clean_repo {
+    for source in /etc/apt/sources.list.d/*.sources;do
+        if grep -q $A_DIST $source;then
+            rm -f $source
+        fi
+    done
+}
+
+function init_auth {
+    :
+}
+
+function add_repo_key {
+    :
+}
+
+function add_repo {
+    local A_PRJ=$1
+    cat >/etc/apt/sources.list.d/$A_PRJ.sources <<- EOF
+		Types: deb
+		URIs: file:/$A_DIST/$A_PRJ/
+		Suites: ./
+		trusted: yes
+		check-valid-until: no
+	EOF
+}

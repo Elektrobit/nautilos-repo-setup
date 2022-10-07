@@ -1,0 +1,35 @@
+#!/bin/bash
+# NautilOS profile environment
+
+A_USER=__USER__
+A_SECRET=__PASS__
+
+A_MACHINE=test-artifactory.elektrobit.com
+A_DIST=eblinux_nautilos2.0_debian_remote
+
+A_REPO_SERVER=https://$A_USER:$A_SECRET@$A_MACHINE/$A_DIST
+
+function clean_repo {
+    rm -f /etc/apt/sources.list.d/nautilos.list
+}
+
+function init_auth {
+    echo "machine $A_MACHINE login $A_USER password $A_SECRET" \
+    > /etc/apt/auth.conf.d/nautilos.conf
+}
+
+function add_repo_key {
+    local A_PRJ=$1
+    local key_name=$(echo "${A_DIST}-${A_PRJ}.asc" | tr '/' '_')
+    sudo curl -u $A_USER:$A_SECRET -L \
+        "https://$A_MACHINE/$A_DIST/$A_PRJ/Release.key" \
+        | cat > /etc/apt/trusted.gpg.d/$key_name
+}
+
+function add_repo {
+    local A_PRJ=$1
+    add_repo_key $A_PRJ
+    sudo echo \
+        "deb https://$A_MACHINE/$A_DIST/$A_PRJ/ /" \
+        >> /etc/apt/sources.list.d/nautilos.list
+}

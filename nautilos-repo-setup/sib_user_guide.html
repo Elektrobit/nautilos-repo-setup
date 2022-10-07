@@ -580,6 +580,22 @@ is the default location for the image descriptions.</p>
 </li>
 </ul>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Running image build processes inside of a container has its limitations.
+Even in privileged mode the container shares the kernel with the host. This means
+all device operations must be compatible with the host kernel. In addition it is
+not possible to run container workloads inside of a container. If this sort
+of issue arises please select another SDK setup method.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect2">
 <h3 id="_repository_setup">Repository Setup</h3>
 <div class="paragraph">
@@ -612,7 +628,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 </div>
@@ -646,14 +662,23 @@ as follows. For further details see: <a href="#examples">Reference Example Image
 </td>
 <td class="content">
 <div class="paragraph">
-<p>For multiarch support on <strong>x86_64</strong> it&#8217;s required to apply the binfmt
-registration from the <strong>multiarch/qemu-user-static</strong> container as
-follows:<br></p>
+<p>For <strong>arm64</strong> (multiarch) support on <strong>x86_64</strong> it&#8217;s required to apply
+the binfmt registration from the <strong>multiarch/qemu-user-static</strong> container
+as follows:<br></p>
 </div>
 <div class="literalblock">
 <div class="content">
 <pre>sudo podman run --rm --privileged \
     docker.io/multiarch/qemu-user-static --reset -p yes</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next install the <strong>arm64</strong> SDK Container as follows:<br></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo apt-get -o Dpkg::Options::="--force-all" \
+    install elektrobit-arm64-sdk-image:arm64</pre>
 </div>
 </div>
 </td>
@@ -694,7 +719,7 @@ the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -730,7 +755,7 @@ and setup the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -817,7 +842,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 </div>
@@ -896,8 +921,12 @@ as an example can be done as follows.</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo -i
-source ~/.ebcl
+<pre>sudo -i</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>source ~/.ebcl
 ebcl-build-arm64 \
     --description /usr/share/kiwi/nautilos/reference-image-description-crinit/nxp \
     --repo-server $A_REPO_SERVER \
@@ -959,7 +988,7 @@ ebcl-sync --user $A_USER --password $A_SECRET</pre>
 <div class="paragraph">
 <p>The command creates a local mirror sync of the Artifactory
 repositories below:<br>
-<code>/var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/release</code></p>
+<code>/var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote</code></p>
 </div>
 <div class="paragraph">
 <p>After the operation the <code>--repo-server</code> argument when building
@@ -1079,7 +1108,7 @@ by EB. New use cases are always open to discussions with EB.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-02 13:45:35 UTC
+Last updated 2022-10-07 08:10:10 UTC
 </div>
 </div>
 </body>

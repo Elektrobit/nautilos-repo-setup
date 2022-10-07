@@ -6,6 +6,9 @@ ARGUMENT_LIST=(
     "user:"
     "password:"
     "no-init"
+    "local:"
+    "production"
+    "test"
 )
 
 # read arguments
@@ -16,9 +19,15 @@ if ! opts=$(getopt \
     -- "$@"
 ); then
     echo "ebcl-repo-setup"
-    echo "  --user"
+    echo "  --local <distpath>"
+    echo "      Use local distribution that must exist below <distpath>"
+    echo "  --test"
+    echo "      Use EB test artifactory server"
+    echo "  --production"
+    echo "      Use EB production artifactory server"
+    echo "  --user <user>"
     echo "      Artifactory user name"
-    echo "  --password"
+    echo "  --password <pass>"
     echo "      Artifactory password"
     echo "  --no-init"
     echo "      Setup environment but do not create"
@@ -30,6 +39,21 @@ eval set --"${opts}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --local)
+            argLocal=$2
+            shift 2
+            ;;
+
+        --production)
+            argProduction=1
+            shift
+            ;;
+
+        --test)
+            argTest=1
+            shift
+            ;;
+
         --user)
             argUser=$2
             shift 2
@@ -51,17 +75,52 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [ ! -e "${HOME}/.ebcl" ];then
-    echo "${HOME}/.ebcl environment file not found"
+# variable setup according to parameters
+if [ -n "${argProduction}" ];then
+    dist_mode="production"
+    ebcl_profile="${HOME}/.ebcl.production"
+elif [ -n "${argLocal}" ];then
+    dist_mode="local"
+    ebcl_profile="${HOME}/.ebcl.local"
+elif [ -n "${argTest}" ];then
+    dist_mode="test"
+    ebcl_profile="${HOME}/.ebcl.test"
+else
+    echo "No setup mode specified, use --local, --test or --production"
     exit 1
 fi
 
-if [ -n "${argUser}" ] && [ -n "${argPass}" ];then
-    echo "Updating credentials in ~/.ebcl"
-    sed -i -es"@__USER__@${argUser}@" ~/.ebcl
-    sed -i -es"@__PASS__@${argPass}@" ~/.ebcl
+echo "Running in [$dist_mode] mode..."
+
+# sanity checks
+if [ ! ${dist_mode} = "local" ];then
+    if [ -z "${argUser}" ] || [ -z "${argPass}" ];then
+        echo "${dist_mode} mode requires --user and --password"
+        exit 1
+    fi
 fi
 
+if [ ! -e "${ebcl_profile}" ];then
+    echo "${ebcl_profile} environment file not found"
+    exit 1
+fi
+
+# copy selected env template to target
+cp "${ebcl_profile}" ~/.ebcl
+
+# update template with parameter settings
+if [ ! ${dist_mode} = "local" ];then
+    if [ -n "${argUser}" ] && [ -n "${argPass}" ];then
+        echo "Updating credentials in ~/.ebcl"
+        sed -i -es"@__USER__@${argUser}@" ~/.ebcl
+        sed -i -es"@__PASS__@${argPass}@" ~/.ebcl
+    fi
+else
+    echo "Updating dist path in ~/.ebcl"
+    sed -i -es"@__DISTPATH__@${argLocal}@" ~/.ebcl
+fi
+
+# create repo files and update cache
 if [ -z "${argNoInit}" ];then
     # shellcheck source=/dev/null
     source "${HOME}/.ebcl"
