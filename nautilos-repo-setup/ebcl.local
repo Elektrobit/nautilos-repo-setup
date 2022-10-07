@@ -14,7 +14,8 @@ function clean_repo {
 }
 
 function init_auth {
-    :
+    echo 'APT { Get { AllowUnauthenticated "1"; }; };' \
+        > /etc/apt/apt.conf.d/99allow_unauth
 }
 
 function add_repo_key {
@@ -23,9 +24,10 @@ function add_repo_key {
 
 function add_repo {
     local A_PRJ=$1
-    cat >/etc/apt/sources.list.d/$A_PRJ.sources <<- EOF
+    local source_file_name=$(echo $A_PRJ | tr "/" "_")
+    cat >/etc/apt/sources.list.d/${source_file_name}.sources <<- EOF
 		Types: deb
-		URIs: file:/$A_DIST/$A_PRJ/
+		URIs: file://$A_DIST/$A_PRJ/
 		Suites: ./
 		trusted: yes
 		check-valid-until: no
