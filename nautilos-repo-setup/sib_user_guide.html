@@ -514,16 +514,22 @@ one from the following list:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="#container">SDK as OCI container (x86_64, aarch64)</a></p>
+<p><a href="#container">SDK as OCI container (x86_64, aarch64)</a><br>
+Requires on premise Ubuntu system, possible to be integrated
+in kubernetes cluser.</p>
 </li>
 <li>
-<p><a href="#amazon_ec2">SDK as AWS EC2 Cloud Instance (x86_64, aarch64)</a></p>
+<p><a href="#amazon_ec2">SDK as AWS EC2 Cloud Instance (x86_64, aarch64)</a><br>
+Requires AWS cloud account with EC2 permissions.</p>
 </li>
 <li>
-<p><a href="#raspberry_pi">SDK on RaspberryPI (aarch64)</a></p>
+<p><a href="#raspberry_pi">SDK on RaspberryPI (aarch64)</a><br>
+Requires on premise <strong>Raspberry Pi 4 Model B</strong> hardware.</p>
 </li>
 <li>
-<p><a href="#custom_install">SDK on Ubuntu based build machine (x86_64, aarch64)</a></p>
+<p><a href="#custom_install">SDK on Ubuntu based build machine (x86_64, aarch64)</a><br>
+Requires on premise hardware for custom installation
+and setup procedure.</p>
 </li>
 </ul>
 </div>
@@ -640,7 +646,7 @@ as follows. For further details see: <a href="#examples">Reference Example Image
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get install reference-image-description-crinit</pre>
+<pre>sudo apt install reference-image-description-crinit</pre>
 </div>
 </div>
 </div>
@@ -651,7 +657,8 @@ as follows. For further details see: <a href="#examples">Reference Example Image
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get install nautilos-builder-oci-flake</pre>
+<pre>sudo apt install oci-pilot
+sudo apt install nautilos-builder-oci-flake</pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -677,7 +684,7 @@ as follows:<br></p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get -o Dpkg::Options::="--force-all" \
+<pre>sudo apt -o Dpkg::Options::="--force-architecture" \
     install elektrobit-arm64-sdk-image:arm64</pre>
 </div>
 </div>
@@ -795,7 +802,7 @@ system packages to be installed:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get install \
+<pre>sudo apt install \
     dpkg-dev apt-utils git gnupg netcat gawk \
     jing qemu-kvm qemu-system-x86 qemu-system-arm \
     python3-solv libsolv-tools fdisk device-tree-compiler \
@@ -853,7 +860,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get install \
+<pre>sudo apt install \
     python3-kiwi kiwi-systemdeps python-kiwi_boxed_plugin debbuild \
     oci-pilot oci-deb nautilos-uboot-tools signing-key-tools \
     storage-key-tools</pre>
@@ -868,7 +875,7 @@ as follows. For further details see: <a href="#examples">Reference Example Image
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo apt-get install reference-image-description-crinit</pre>
+<pre>sudo apt install reference-image-description-crinit</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -980,24 +987,18 @@ follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo -i
-source ~/.ebcl
-ebcl-sync --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-sync --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The command creates a local mirror sync of the Artifactory
-repositories below:<br>
-<code>/var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote</code></p>
-</div>
-<div class="paragraph">
-<p>After the operation the <code>--repo-server</code> argument when building
-an image can be changed to point to:</p>
+repositories below <code>/var/tmp/nautilos</code>. After the operation
+call <code>ebcl-repo-setup</code> as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>--repo-server dir:///var/tmp/nautilos/artifactory.elektrobit.com
---dist-prefix eb_corbos_linux_nautilos2.0-debian-remote</pre>
+<pre>sudo ebcl-repo-setup --local \
+    /var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/</pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -1108,7 +1109,7 @@ by EB. New use cases are always open to discussions with EB.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-07 08:10:10 UTC
+Last updated 2022-10-10 09:33:37 UTC
 </div>
 </div>
 </body>
