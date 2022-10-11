@@ -1,0 +1,109 @@
+#!/bin/bash
+
+set -e
+
+ARTIFACTORY=https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote
+DISTPATH=/var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote
+
+# setup container based SDK from local repo sync
+function setup_container_sdk {
+    clear
+    # shellcheck disable=SC2086
+    sudo dpkg --install \
+        ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
+
+    sudo ebcl-repo-setup --local "${DISTPATH}"
+
+    sudo apt --yes install reference-image-description-crinit
+    sudo apt --yes install reference-image-description-jammy
+
+    sudo apt --yes install oci-pilot
+    sudo apt --yes install nautilos-builder-oci-flake
+
+    if [ "$(arch)" = "x86_64" ];then
+        sudo podman run --rm --privileged \
+            docker.io/multiarch/qemu-user-static --reset -p yes
+        sudo apt --yes -o Dpkg::Options::="--force-architecture" \
+            install elektrobit-arm64-sdk-image:arm64
+    fi
+}
+
+function build_image {
+    local image_description=$1
+    clear
+    if [[ ${image_description} =~ /nxp ]];then
+        ebcl_build=ebcl-build-arm64
+    else
+        ebcl_build=ebcl-build-amd64
+    fi
+    ebcl_build="$ebcl_build --description ${image_description}"
+    ebcl_build="$ebcl_build --repo-server dir://${DISTPATH}"
+    ebcl_build="$ebcl_build --dist-prefix none --local"
+    if [[ ${image_description} =~ reference-image-description-crinit ]];then
+        ebcl_build="$ebcl_build --profile RO"
+    fi
+    # shellcheck disable=SC2086
+    sudo $ebcl_build
+}
+
+function get_image_descriptions_for_selection {
+    echo -n "entries=( "
+    find /usr/share/kiwi/nautilos/ -maxdepth 3 -name build -print0 | \
+    while read -r -d $'\0' build; do
+        desc=$(dirname "${build}")
+        echo -n "${desc} \"\" off "
+    done
+    echo ")"
+}
+
+# main
+if ! dialog --version;then
+    echo "dialog program not found, run 'sudo apt install dialog'"
+    exit 1
+fi
+
+# fetch nautilos-repo-setup
+if [ ! -d "${DISTPATH}" ];then
+    user=$(
+        dialog --insecure --passwordbox "Enter Artifactory User Name" 8 60 \
+        3>&1 1>&2 2>&3
+    )
+    secret=$(
+        dialog --insecure --passwordbox "Enter Artifactory Password" 8 60 \
+        3>&1 1>&2 2>&3
+    )
+    wget --user "${user}" --password "${secret}" \
+        --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
+    $ARTIFACTORY/release/xUbuntu_22.04_debbuild/all/
+    clear
+    # shellcheck disable=SC2012
+    sudo dpkg --install "$(ls -1t nautilos-repo-setup* | head -n1)"
+    sudo ebcl-sync --user "${user}" --password "${secret}"
+fi
+
+# setup SDK
+sdk_method=$(
+    dialog \
+        --radiolist "Select SDK setup method" 20 40 10 Container "" on \
+        3>&1 1>&2 2>&3
+)
+case "${sdk_method}" in
+    Container)
+        setup_container_sdk
+        ;;
+    *)
+        exit 1
+        ;;
+esac
+
+# select image to build and build it
+declare -a entries
+eval "$(get_image_descriptions_for_selection)"
+image_description=$(
+    dialog --radiolist \
+        "Select Reference Image Description" 20 78 10 "${entries[@]}" \
+        3>&1 1>&2 2>&3
+)
+if [ -d "${image_description}" ];then
+    build_image "${image_description}"
+fi
