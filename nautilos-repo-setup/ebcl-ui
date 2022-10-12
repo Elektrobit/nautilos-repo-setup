@@ -2,17 +2,27 @@
 
 set -e
 
-ARTIFACTORY=https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote
-DISTPATH=/var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote
+declare -a credentials
+declare -a descriptions
 
-# setup container based SDK from local repo sync
+A_MACHINE="artifactory.elektrobit.com"
+A_DIST="eb_corbos_linux_nautilos2.0-debian-remote"
+DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
+
 function setup_container_sdk {
-    clear
-    # shellcheck disable=SC2086
-    sudo dpkg --install \
-        ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
-
-    sudo ebcl-repo-setup --local "${DISTPATH}"
+    local repo_location=$1
+    if [ "${repo_location}" = "local_repos" ];then
+        if [ -d "${DISTPATH}" ];then
+            sudo ebcl-repo-setup --local "${DISTPATH}"
+        else
+             dialog --infobox "No local repos available, mirror first !" 3 60
+             exit 1
+        fi
+    else
+        eval "$(get_credentials)"
+        sudo ebcl-repo-setup --production \
+            --user "${credentials[0]}" --password "${credentials[1]}"
+    fi
 
     sudo apt --yes install reference-image-description-crinit
     sudo apt --yes install reference-image-description-jammy
@@ -30,15 +40,23 @@ function setup_container_sdk {
 
 function build_image {
     local image_description=$1
-    clear
+    local repo_location=$2
+    local repo_server
+    if [ "${repo_location}" = "local_repos" ];then
+        repo_server="dir://${DISTPATH}"
+    else
+        eval "$(get_credentials)"
+        repo_server="https://${credentials[0]}:${credentials[1]}@${A_MACHINE}/${A_DIST}"
+    fi
+
     if [[ ${image_description} =~ /nxp ]];then
         ebcl_build=ebcl-build-arm64
     else
         ebcl_build=ebcl-build-amd64
     fi
     ebcl_build="$ebcl_build --description ${image_description}"
-    ebcl_build="$ebcl_build --repo-server dir://${DISTPATH}"
-    ebcl_build="$ebcl_build --dist-prefix none --local"
+    ebcl_build="$ebcl_build --repo-server ${repo_server}"
+    ebcl_build="$ebcl_build --dist-prefix none --local --clean"
     if [[ ${image_description} =~ reference-image-description-crinit ]];then
         ebcl_build="$ebcl_build --profile RO"
     fi
@@ -47,7 +65,7 @@ function build_image {
 }
 
 function get_image_descriptions_for_selection {
-    echo -n "entries=( "
+    echo -n "descriptions=( "
     find /usr/share/kiwi/nautilos/ -maxdepth 3 -name build -print0 | \
     while read -r -d $'\0' build; do
         desc=$(dirname "${build}")
@@ -56,54 +74,95 @@ function get_image_descriptions_for_selection {
     echo ")"
 }
 
+function get_credentials {
+    local user="${credentials[0]}"
+    local secret="${credentials[1]}"
+    if [ -z "${user}" ] && [ -z "${secret}" ];then
+        user=$(
+            dialog --insecure --passwordbox "Enter Artifactory User Name" 8 60 \
+            3>&1 1>&2 2>&3
+        )
+        secret=$(
+            dialog --insecure --passwordbox "Enter Artifactory Password" 8 60 \
+            3>&1 1>&2 2>&3
+        )
+    fi
+    echo "credentials=( \"${user}\" \"${secret}\" )"
+}
+
+function install_nautilos_repo_setup {
+    if [ -d ${DISTPATH} ];then
+        # shellcheck disable=SC2086
+        sudo dpkg --install \
+            ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
+    else
+        eval "$(get_credentials)"
+        # shellcheck disable=SC2086
+        wget --user "${credentials[0]}" --password "${credentials[1]}" \
+            --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
+            https://${A_MACHINE}/${A_DIST}/release/xUbuntu_22.04_debbuild/all/
+        # shellcheck disable=SC2012
+        sudo dpkg --install "$(ls -1t nautilos-repo-setup* | head -n1)"
+    fi
+}
+
+function create_update_local_repo_mirror {
+    local user="${credentials[0]}"
+    local secret="${credentials[1]}"
+    sudo ebcl-sync --user "${user}" --password "${secret}"
+}
+
 # main
 if ! dialog --version;then
     echo "dialog program not found, run 'sudo apt install dialog'"
     exit 1
 fi
 
-# fetch nautilos-repo-setup
-if [ ! -d "${DISTPATH}" ];then
-    user=$(
-        dialog --insecure --passwordbox "Enter Artifactory User Name" 8 60 \
-        3>&1 1>&2 2>&3
-    )
-    secret=$(
-        dialog --insecure --passwordbox "Enter Artifactory Password" 8 60 \
-        3>&1 1>&2 2>&3
-    )
-    wget --user "${user}" --password "${secret}" \
-        --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
-    $ARTIFACTORY/release/xUbuntu_22.04_debbuild/all/
-    clear
-    # shellcheck disable=SC2012
-    sudo dpkg --install "$(ls -1t nautilos-repo-setup* | head -n1)"
-    sudo ebcl-sync --user "${user}" --password "${secret}"
+if ! dialog --yesno "Start the EBCL SDK Setup ?" 5 60;then
+    exit 0
 fi
 
-# setup SDK
-sdk_method=$(
-    dialog \
-        --radiolist "Select SDK setup method" 20 40 10 Container "" on \
+# install ebcl-repo-setup if not yet done
+if [ ! -e "/usr/bin/ebcl-repo-setup" ];then
+    install_nautilos_repo_setup
+fi
+
+# offer the menu
+menu_selection=$(
+    dialog --menu "EBCL SDK" 20 50 30 \
+        "1" "Build Reference Image" \
+        "2" "Create/Update Local Repository Mirror" \
         3>&1 1>&2 2>&3
 )
-case "${sdk_method}" in
-    Container)
-        setup_container_sdk
+case "${menu_selection}" in
+    1)
+        if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
+            setup_container_sdk "local_repos"
+        fi
+        eval "$(get_image_descriptions_for_selection)"
+        if [ -n "${descriptions[*]}" ];then
+            image_description=$(
+                dialog --radiolist \
+                    "Select Image Description" 20 78 10 "${descriptions[@]}" \
+                    3>&1 1>&2 2>&3
+            )
+            if [ -d "${image_description}" ];then
+                if [ -d "${DISTPATH}" ];then
+                    build_image "${image_description}" "local_repos"
+                else
+                    build_image "${image_description}" "remote_repos"
+                fi
+            fi
+        else
+            dialog --infobox "No image description(s) found !" 3 60
+            exit 1
+        fi
+        ;;
+    2)
+        eval "$(get_credentials)"
+        create_update_local_repo_mirror
         ;;
     *)
         exit 1
         ;;
 esac
-
-# select image to build and build it
-declare -a entries
-eval "$(get_image_descriptions_for_selection)"
-image_description=$(
-    dialog --radiolist \
-        "Select Reference Image Description" 20 78 10 "${entries[@]}" \
-        3>&1 1>&2 2>&3
-)
-if [ -d "${image_description}" ];then
-    build_image "${image_description}"
-fi
