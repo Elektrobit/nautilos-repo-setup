@@ -137,7 +137,7 @@ function create_update_local_repo_mirror {
 
 # main
 if ! whiptail --version;then
-    echo "whiptail not found, run 'sudo apt install newt'"
+    echo "whiptail not found, run 'sudo apt install whiptail'"
     exit 1
 fi
 

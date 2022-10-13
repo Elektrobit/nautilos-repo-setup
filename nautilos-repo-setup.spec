@@ -8,6 +8,7 @@ License:    MIT
 Packager:   Marcus Schaefer <marcus.schaefer@elektrobit.com>
 %endif
 Source0:    %{name}-%{version}.tar.gz
+Requires:   whiptail
 Requires:   curl
 Requires:   wget
 BuildArch:  noarch
