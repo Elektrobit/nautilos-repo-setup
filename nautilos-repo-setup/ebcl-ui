@@ -26,7 +26,7 @@ set -e
 declare -a credentials
 declare -a descriptions
 
-TERM=linux
+export TERM=xterm
 
 A_MACHINE="artifactory.elektrobit.com"
 A_DIST="eb_corbos_linux_nautilos2.0-debian-remote"
@@ -42,7 +42,7 @@ function setup_container_sdk {
             exit 1
         fi
     else
-        eval "$(get_credentials)"
+        get_credentials
         sudo ebcl-repo-setup --production \
             --user "${credentials[0]}" --password "${credentials[1]}"
     fi
@@ -68,7 +68,7 @@ function build_image {
     if [ "${repo_location}" = "local_repos" ];then
         repo_server="dir://${DISTPATH}"
     else
-        eval "$(get_credentials)"
+        get_credentials
         repo_server="https://${credentials[0]}:${credentials[1]}@${A_MACHINE}/${A_DIST}"
     fi
 
@@ -89,12 +89,14 @@ function build_image {
 
 function get_image_descriptions_for_selection {
     echo -n "descriptions=( "
-    find /usr/share/kiwi/nautilos/ -maxdepth 3 -name build -print0 | \
+    pushd /usr/share/kiwi/nautilos/ &>/dev/null
+    find . -maxdepth 3 -name build -print0 | \
     while read -r -d $'\0' build; do
-        desc=$(dirname "${build}")
+        desc=$(dirname "${build}" | cut -f2- -d '/')
         echo -n "${desc} \"\" off "
     done
     echo ")"
+    popd &>/dev/null
 }
 
 function get_credentials {
@@ -102,15 +104,15 @@ function get_credentials {
     local secret="${credentials[1]}"
     if [ -z "${user}" ] && [ -z "${secret}" ];then
         user=$(
-            whiptail --passwordbox "Enter Artifactory User Name:" 8 60
+            whiptail --passwordbox "Enter Artifactory User Name:" 8 60 \
             3>&1 1>&2 2>&3
         )
         secret=$(
-            whiptail --passwordbox "Enter Artifactory Password:" 8 60
+            whiptail --passwordbox "Enter Artifactory Password:" 8 60 \
             3>&1 1>&2 2>&3
         )
     fi
-    echo "credentials=( \"${user}\" \"${secret}\" )"
+    eval "credentials=( \"${user}\" \"${secret}\" )"
 }
 
 function install_nautilos_repo_setup {
@@ -119,7 +121,7 @@ function install_nautilos_repo_setup {
         sudo dpkg --install \
             ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
     else
-        eval "$(get_credentials)"
+        get_credentials
         # shellcheck disable=SC2086
         wget --user "${credentials[0]}" --password "${credentials[1]}" \
             --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
@@ -160,7 +162,7 @@ menu_selection=$(
 )
 case "${menu_selection}" in
     1)
-        eval "$(get_credentials)"
+        get_credentials
         create_update_local_repo_mirror
         ;;
     2)
@@ -187,6 +189,7 @@ case "${menu_selection}" in
                     "Select Image Description:" 20 78 10 "${descriptions[@]}" \
                     3>&1 1>&2 2>&3
             )
+            image_description="/usr/share/kiwi/nautilos/${image_description}"
             if [ -d "${image_description}" ];then
                 if [ -d "${DISTPATH}" ];then
                     build_image "${image_description}" "local_repos"
