@@ -1,9 +1,32 @@
 #!/bin/bash
-
+# Copyright (c) 2022 Elektrobit Automotive GmbH
+#
+# This file is part of nautilos-repo-setup.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 set -e
 
 declare -a credentials
 declare -a descriptions
+
+TERM=linux
 
 A_MACHINE="artifactory.elektrobit.com"
 A_DIST="eb_corbos_linux_nautilos2.0-debian-remote"
@@ -15,8 +38,8 @@ function setup_container_sdk {
         if [ -d "${DISTPATH}" ];then
             sudo ebcl-repo-setup --local "${DISTPATH}"
         else
-             dialog --infobox "No local repos available, mirror first !" 3 60
-             exit 1
+            whiptail --msgbox "No local repos available, mirror first !" 7 60
+            exit 1
         fi
     else
         eval "$(get_credentials)"
@@ -79,11 +102,11 @@ function get_credentials {
     local secret="${credentials[1]}"
     if [ -z "${user}" ] && [ -z "${secret}" ];then
         user=$(
-            dialog --insecure --passwordbox "Enter Artifactory User Name" 8 60 \
+            whiptail --passwordbox "Enter Artifactory User Name:" 8 60
             3>&1 1>&2 2>&3
         )
         secret=$(
-            dialog --insecure --passwordbox "Enter Artifactory Password" 8 60 \
+            whiptail --passwordbox "Enter Artifactory Password:" 8 60
             3>&1 1>&2 2>&3
         )
     fi
@@ -113,12 +136,12 @@ function create_update_local_repo_mirror {
 }
 
 # main
-if ! dialog --version;then
-    echo "dialog program not found, run 'sudo apt install dialog'"
+if ! whiptail --version;then
+    echo "whiptail not found, run 'sudo apt install newt'"
     exit 1
 fi
 
-if ! dialog --yesno "Start the EBCL SDK Setup ?" 5 60;then
+if ! whiptail --yesno "Start the EBCL SDK Setup ?" 7 60;then
     exit 0
 fi
 
@@ -129,21 +152,39 @@ fi
 
 # offer the menu
 menu_selection=$(
-    dialog --menu "EBCL SDK" 20 50 30 \
-        "1" "Build Reference Image" \
-        "2" "Create/Update Local Repository Mirror" \
+    whiptail --menu "EBCL SDK" 15 50 5 \
+        "1" "Create/Update Local Repository Mirror" \
+        "2" "Run SDK Setup" \
+        "3" "Build Reference Image(s)" \
         3>&1 1>&2 2>&3
 )
 case "${menu_selection}" in
     1)
+        eval "$(get_credentials)"
+        create_update_local_repo_mirror
+        ;;
+    2)
         if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-            setup_container_sdk "local_repos"
+            if [ -d "${DISTPATH}" ];then
+                setup_container_sdk "local_repos"
+            else
+                setup_container_sdk "remote_repos"
+            fi
+        else
+            whiptail --msgbox "SDK already configured" 7 60
+            exit 0
+        fi
+        ;;
+    3)
+        if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
+            whiptail --msgbox "SDK not configured, run SDK Setup first !" 7 60
+            exit 1
         fi
         eval "$(get_image_descriptions_for_selection)"
         if [ -n "${descriptions[*]}" ];then
             image_description=$(
-                dialog --radiolist \
-                    "Select Image Description" 20 78 10 "${descriptions[@]}" \
+                whiptail --radiolist \
+                    "Select Image Description:" 20 78 10 "${descriptions[@]}" \
                     3>&1 1>&2 2>&3
             )
             if [ -d "${image_description}" ];then
@@ -154,13 +195,9 @@ case "${menu_selection}" in
                 fi
             fi
         else
-            dialog --infobox "No image description(s) found !" 3 60
+            whiptail --msgbox "No image description(s) found" 7 60
             exit 1
         fi
-        ;;
-    2)
-        eval "$(get_credentials)"
-        create_update_local_repo_mirror
         ;;
     *)
         exit 1
