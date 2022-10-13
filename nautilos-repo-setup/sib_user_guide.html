@@ -505,11 +505,94 @@ Please make sure to have your account details (username and password) at hand.</
 </div>
 </div>
 <div class="sect1">
-<h2 id="_select_sdk_setup_method">Select SDK Setup Method</h2>
+<h2 id="quick">Quick Start</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>If not installed, download the <code>ebcl-ui</code> utility from here:
+<a href="https://github.com/Elektrobit/nautilos-repo-setup/raw/master/nautilos-repo-setup/ebcl-ui">ebcl-ui</a></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Access is still protected even though we plan to opensource it.
+In case access is denied please get in contact.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once installed call:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>ebcl-ui</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The program guides the user through a dialog based process.
+At its end a menu shows up which allows for the following actions:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Create/Update Local Repository Mirror</strong><br>
+In case the SDK workflow should be offline, this selection
+creates a local mirror of the EBCL software repositories.
+During runtime a connection to <a href="https://artifactory.elektrobit.com:">Artifactory</a>
+is required. Subsequent selections of this menu entry leads
+to an incremental update of the data.</p>
+</li>
+<li>
+<p><strong>Run SDK Setup</strong><br>
+In case there is no pre-provided SDK configuration available
+this selection will configure the SDK using the <a href="#container">SDK as OCI container (x86_64, aarch64)</a>
+method. If no local mirror exists this requires a connection
+to <a href="https://artifactory.elektrobit.com:">Artifactory</a></p>
+</li>
+<li>
+<p><strong>Build Reference Image(s)</strong><br>
+This selection searches for the installed reference image
+descriptions and offers them in a list view from which the
+user can select. The selected image will then be build.
+If no local mirror exists this requires a connection
+to <a href="https://artifactory.elektrobit.com:">Artifactory</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sdk_setup_methods">SDK Setup Methods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following chapters describes the SDK and image building setup
+procedures on a commandline tool based workflow. For a quick start
+without further details about the SDK tooling and features go to
+<a href="#quick">Quick Start</a></p>
+</div>
+<div class="paragraph">
 <p>There are currently four setup methods available. Please select
-one from the following list:</p>
+one from the list below:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The description on the <code>ebcl-repo-setup</code> tool is provided
+in production mode which will access the data from
+<a href="https://artifactory.elektrobit.com" class="bare">https://artifactory.elektrobit.com</a>. In case the
+SDK workloads should be done in offline mode, an <code>ebcl-sync</code>
+process as described in <a href="#offline">Offline Image Building</a> should be performed first.
+</td>
+</tr>
+</table>
 </div>
 <div class="ulist">
 <ul>
@@ -605,7 +688,8 @@ of issue arises please select another SDK setup method.
 <div class="sect2">
 <h3 id="_repository_setup">Repository Setup</h3>
 <div class="paragraph">
-<p>Download and install the latest <strong>nautilos-repo-setup</strong> package as follows:</p>
+<p><strong>If not already done</strong>, download and install the
+latest <code>nautilos-repo-setup</code> package as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -703,10 +787,9 @@ as follows:<br></p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>There are Amazon EC2 images for x86_64 and aarch64 available
-at: <a href="https://ebs.ebgroup.elektrobit.com/package/show/nautilos:2.0:devel:images/nautilos-builder-ec2" class="bare">https://ebs.ebgroup.elektrobit.com/package/show/nautilos:2.0:devel:images/nautilos-builder-ec2</a>.
+at: <a href="https://ebs.ebgroup.elektrobit.com/package/show/nautilos:2.0:devel:images/nautilos-builder-ec2:">nautilos-builder-ec2</a>.
 The images can be uploaded and registered as AMI&#8217;s (Amazon Machine Image).
-For further details how to register images in EC2 please get in contact
-with Marcus Schäfer &lt;<a href="mailto:marcus.schaefer@elektrobit.com">marcus.schaefer@elektrobit.com</a>&gt;</p>
+For further details how to register images in EC2 please contact us.</p>
 </div>
 <div class="sect2">
 <h3 id="_environment_setup">Environment Setup</h3>
@@ -740,7 +823,7 @@ the <code>~/.ebcl</code> environment as follows:</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To setup a SDK system on a <strong>RaspberryPI</strong> dump the
-<strong>uncompressed</strong> image from: <a href="http://repos.ebgroup.elektrobit.com/nautilos:/2.0:/devel:/images/images/nautilos-builder-rpi.aarch64.raw.xz" class="bare">http://repos.ebgroup.elektrobit.com/nautilos:/2.0:/devel:/images/images/nautilos-builder-rpi.aarch64.raw.xz</a> on a SD card
+<strong>uncompressed</strong> image from: <a href="http://repos.ebgroup.elektrobit.com/nautilos:/2.0:/devel:/images/images/nautilos-builder-rpi.aarch64.raw.xz:">nautilos-builder-rpi</a> on a SD card
 and boot it up on a <strong>Raspberry Pi 4 Model B</strong> with either 4G
 (better 8G) of RAM space.</p>
 </div>
@@ -820,7 +903,8 @@ how to install the needed components.</p>
 <div class="sect2">
 <h3 id="_repository_setup_2">Repository Setup</h3>
 <div class="paragraph">
-<p>Download and install the latest <strong>nautilos-repo-setup</strong> package as follows:</p>
+<p><strong>If not already done</strong>, download and install the
+latest <code>nautilos-repo-setup</code> package as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -978,20 +1062,52 @@ sudo dd if=test-image-embedded-crinit-nxp.aarch64-1.0.2.raw of=/dev/SD-CARD</pre
 <h2 id="offline">Offline Image Building</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When building an image the <code>--repo-server</code> argument specifies the
-repository endpoint to point to the Artifactory server within the
-Elektrobit domain. On an SDK machine which should work completely
-offline it is therefore required to sync that repository to the
-local system. To run this sync operation, call <strong>ebcl-sync</strong> as
-follows:</p>
+<p>When building an image the <code>--repo-server</code> argument of the
+<code>ebcl-build-ARCH</code> command specifies the repository endpoint of the
+Artifactory server within the Elektrobit domain. On an SDK machine
+which should work completely offline it is therefore required to sync
+that repositories to the local system first. To run this sync operation,
+call <strong>ebcl-sync</strong> as follows:</p>
+</div>
+<div class="paragraph">
+<p>Setup Artifactory access credentials:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-sync --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
+<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The command creates a local mirror sync of the Artifactory
+<p><strong>If not already done</strong>, download and install the latest
+<code>nautilos-repo-setup</code> package as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>wget --user $A_USER --password $A_SECRET \
+    --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
+https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/release/xUbuntu_22.04_debbuild/all/</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo dpkg --install $(ls -1t nautilos-repo-setup* | head -n1)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sync repos to your local system. This process takes some time to complete:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-sync --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ebcl-sync</code> command created a local mirror sync of the Artifactory
 repositories below <code>/var/tmp/nautilos</code>. After the operation
 call <code>ebcl-repo-setup</code> as follows:</p>
 </div>
@@ -1109,7 +1225,7 @@ by EB. New use cases are always open to discussions with EB.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-10 09:33:37 UTC
+Last updated 2022-10-13 10:49:33 UTC
 </div>
 </div>
 </body>
