@@ -138,9 +138,11 @@ function install_nautilos_repo_setup {
 }
 
 function create_update_local_repo_mirror {
-    local user="${credentials[0]}"
-    local secret="${credentials[1]}"
-    sudo ebcl-sync --user "${user}" --password "${secret}"
+    get_credentials
+    if [ ! -e "/usr/bin/ebcl-sync" ];then
+        install_nautilos_repo_setup
+    fi
+    sudo ebcl-sync --user "${credentials[0]}" --password "${credentials[1]}"
 }
 
 # main
@@ -161,7 +163,6 @@ while true;do
     )
     case "${menu_selection}" in
         1)
-            get_credentials
             create_update_local_repo_mirror
             ;;
         2)
