@@ -25,6 +25,7 @@ set -e
 
 declare -a credentials
 declare -a descriptions
+declare -x target_dir
 
 export TERM=xterm
 
@@ -39,7 +40,7 @@ function setup_container_sdk {
             sudo ebcl-repo-setup --local "${DISTPATH}"
         else
             whiptail --msgbox "No local repos available, mirror first !" 7 60
-            exit 1
+            return
         fi
     else
         get_credentials
@@ -65,6 +66,7 @@ function build_image {
     local image_description=$1
     local repo_location=$2
     local repo_server
+    target_dir="/var/tmp/image"
     if [ "${repo_location}" = "local_repos" ];then
         repo_server="dir://${DISTPATH}"
     else
@@ -77,23 +79,27 @@ function build_image {
     else
         ebcl_build=ebcl-build-amd64
     fi
+    ebcl_build="$ebcl_build --target-dir ${target_dir}"
     ebcl_build="$ebcl_build --description ${image_description}"
     ebcl_build="$ebcl_build --repo-server ${repo_server}"
     ebcl_build="$ebcl_build --dist-prefix none --local --clean"
     if [[ ${image_description} =~ reference-image-description-crinit ]];then
         ebcl_build="$ebcl_build --profile RO"
+        target_dir="${target_dir}.RO"
     fi
     # shellcheck disable=SC2086
     sudo $ebcl_build
 }
 
 function get_image_descriptions_for_selection {
+    local selected=on
     echo -n "descriptions=( "
     pushd /usr/share/kiwi/nautilos/ &>/dev/null
     find . -maxdepth 3 -name build -print0 | \
     while read -r -d $'\0' build; do
         desc=$(dirname "${build}" | cut -f2- -d '/')
-        echo -n "${desc} \"\" off "
+        echo -n "${desc} \"\" ${selected} "
+        selected=off
     done
     echo ")"
     popd &>/dev/null
@@ -143,66 +149,68 @@ if ! whiptail --version;then
     exit 1
 fi
 
-if ! whiptail --yesno "Start the EBCL SDK Setup ?" 7 60;then
-    exit 0
-fi
-
-# install ebcl-repo-setup if not yet done
-if [ ! -e "/usr/bin/ebcl-repo-setup" ];then
-    install_nautilos_repo_setup
-fi
-
-# offer the menu
-menu_selection=$(
-    whiptail --menu "EBCL SDK" 15 50 5 \
-        "1" "Create/Update Local Repository Mirror" \
-        "2" "Run SDK Setup" \
-        "3" "Build Reference Image(s)" \
-        3>&1 1>&2 2>&3
-)
-case "${menu_selection}" in
-    1)
-        get_credentials
-        create_update_local_repo_mirror
-        ;;
-    2)
-        if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-            if [ -d "${DISTPATH}" ];then
-                setup_container_sdk "local_repos"
-            else
-                setup_container_sdk "remote_repos"
+# main loop
+while true;do
+    menu_selection=$(
+        whiptail --menu "EBCL SDK" 15 50 5 \
+            "1" "Create/Update Local Repository Mirror" \
+            "2" "Run SDK Setup" \
+            "3" "Build Reference Image(s)" \
+            "4" "Exit" \
+            3>&1 1>&2 2>&3
+    )
+    case "${menu_selection}" in
+        1)
+            get_credentials
+            create_update_local_repo_mirror
+            ;;
+        2)
+            if [ ! -e "/usr/bin/ebcl-repo-setup" ];then
+                install_nautilos_repo_setup
             fi
-        else
-            whiptail --msgbox "SDK already configured" 7 60
-            exit 0
-        fi
-        ;;
-    3)
-        if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-            whiptail --msgbox "SDK not configured, run SDK Setup first !" 7 60
-            exit 1
-        fi
-        eval "$(get_image_descriptions_for_selection)"
-        if [ -n "${descriptions[*]}" ];then
-            image_description=$(
-                whiptail --radiolist \
-                    "Select Image Description:" 20 78 10 "${descriptions[@]}" \
-                    3>&1 1>&2 2>&3
-            )
-            image_description="/usr/share/kiwi/nautilos/${image_description}"
-            if [ -d "${image_description}" ];then
+            if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
                 if [ -d "${DISTPATH}" ];then
-                    build_image "${image_description}" "local_repos"
+                    setup_container_sdk "local_repos"
                 else
-                    build_image "${image_description}" "remote_repos"
+                    setup_container_sdk "remote_repos"
+                fi
+            else
+                whiptail --msgbox "SDK already configured" 7 60
+            fi
+            ;;
+        3)
+            if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
+                whiptail --msgbox "SDK not configured, run SDK Setup first !" 7 60
+            else
+                eval "$(get_image_descriptions_for_selection)"
+                if [ -n "${descriptions[*]}" ];then
+                    image_description=$(
+                        whiptail --radiolist \
+                            "Select Image Description:" 20 78 10 "${descriptions[@]}" \
+                            3>&1 1>&2 2>&3
+                    )
+                    image_description="/usr/share/kiwi/nautilos/${image_description}"
+                    if [ -d "${image_description}" ];then
+                        if [ -d "${DISTPATH}" ];then
+                            build_image "${image_description}" "local_repos"
+                        else
+                            build_image "${image_description}" "remote_repos"
+                        fi
+                        for result in "${target_dir}"/*.raw;do
+                            whiptail --msgbox "${result}" --title "Image Binary" 8 78
+                            break
+                        done
+                    fi
+                else
+                    whiptail --msgbox "No image description(s) found" 7 60
                 fi
             fi
-        else
-            whiptail --msgbox "No image description(s) found" 7 60
+            ;;
+        4)
+            exit 0
+            ;;
+        *)
             exit 1
-        fi
-        ;;
-    *)
-        exit 1
-        ;;
-esac
+            ;;
+    esac
+done
