@@ -151,11 +151,8 @@ if [ -z "${argNoInit}" ];then
 
     init_auth
 
-    # NautilOS development repositories
-    add_repo devel/containers
-    add_repo devel/xUbuntu_22.04_debbuild
-
     # NautilOS release repositories
+    add_repo release/containers
     add_repo release/xUbuntu_22.04_debbuild
 
     apt-get update

@@ -30,7 +30,6 @@ ARGUMENT_LIST=(
 
 LOCAL="/var/tmp/nautilos"
 REMOTE="https://artifactory.elektrobit.com"
-DEVEL="${REMOTE}/eb_corbos_linux_nautilos2.0-debian-remote/devel/"
 RELEASE="${REMOTE}/eb_corbos_linux_nautilos2.0-debian-remote/release/"
 
 # read arguments
@@ -80,10 +79,6 @@ fi
 
 mkdir -p "${LOCAL}"
 pushd "${LOCAL}"
-
-# shellcheck disable=SC2086
-wget --user "${argUser}" ${credentials} \
-    --mirror --recursive --no-parent --convert-links "${DEVEL}"
 
 # shellcheck disable=SC2086
 wget --user "${argUser}" ${credentials} \
