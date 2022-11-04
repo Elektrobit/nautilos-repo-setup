@@ -28,7 +28,7 @@ ARGUMENT_LIST=(
     "password:"
     "no-init"
     "local:"
-    "production"
+    "production:"
     "test"
 )
 
@@ -43,9 +43,10 @@ if ! opts=$(getopt \
     echo "  --local <distpath>"
     echo "      Use local distribution that must exist below <distpath>"
     echo "  --test"
-    echo "      Use EB test artifactory server"
-    echo "  --production"
-    echo "      Use EB production artifactory server"
+    echo "      Use EB development snapshot artifactory server"
+    echo "  --production <release_date>"
+    echo "      Use EB production artifactory server for"
+    echo "      given release date in format: YYYY-MM-DD"
     echo "  --user <user>"
     echo "      Artifactory user name"
     echo "  --password <pass>"
@@ -66,8 +67,8 @@ while [[ $# -gt 0 ]]; do
             ;;
 
         --production)
-            argProduction=1
-            shift
+            argProduction=$2
+            shift 2
             ;;
 
         --test)
@@ -135,6 +136,10 @@ if [ ! ${dist_mode} = "local" ];then
         echo "Updating credentials in ~/.ebcl"
         sed -i -es"@__USER__@${argUser}@" ~/.ebcl
         sed -i -es"@__PASS__@${argPass}@" ~/.ebcl
+    fi
+    if [ -n "${argProduction}" ];then
+        echo "Updating release in ~/.ebcl"
+        sed -i -es"@__RELEASE__@${argProduction}@" ~/.ebcl
     fi
 else
     echo "Updating dist path in ~/.ebcl"

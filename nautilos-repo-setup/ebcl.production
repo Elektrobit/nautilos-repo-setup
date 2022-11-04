@@ -4,8 +4,9 @@
 A_USER=__USER__
 A_SECRET=__PASS__
 
+A_RELEASE=__RELEASE__
 A_MACHINE=artifactory.elektrobit.com
-A_DIST=eb_corbos_linux_nautilos2.0-debian-remote
+A_DIST=eb_corbos_linux_nautilos2.0-releases-generic/$A_RELEASE
 
 A_REPO_SERVER=https://$A_USER:$A_SECRET@$A_MACHINE/$A_DIST
 

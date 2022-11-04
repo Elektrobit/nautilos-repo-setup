@@ -23,15 +23,13 @@
 #
 set -e
 
+A_MACHINE=https://artifactory.elektrobit.com
+A_DIST=eb_corbos_linux_nautilos2.0-releases-generic
+
 ARGUMENT_LIST=(
     "user:"
     "password:"
-    "production:"
 )
-
-LOCAL=/var/tmp/nautilos
-REMOTE=https://artifactory.elektrobit.com
-DIST=eb_corbos_linux_nautilos2.0-releases-generic
 
 # read arguments
 if ! opts=$(getopt \
@@ -40,14 +38,11 @@ if ! opts=$(getopt \
     --options "" \
     -- "$@"
 ); then
-    echo "ebcl-sync"
-    echo "  --user"
-    echo "      Artifactory User Name"
-    echo "  --password"
-    echo "      User password"
-    echo "  --production <release_date>"
-    echo "      Fetch from EB production artifactory server for"
-    echo "      given release date in format: YYYY-MM-DD"
+    echo "ebcl-releases"
+    echo "  --user <user>"
+    echo "      Artifactory user name"
+    echo "  --password <pass>"
+    echo "      Artifactory password"
     exit 1
 fi
 
@@ -65,41 +60,22 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
 
-        --production)
-            argProduction=$2
-            shift 2
-            ;;
-
         *)
             break
             ;;
     esac
 done
 
-if [ -z "${argUser}" ];then
-    echo "No user name specified, try --user"
+# sanity checks
+if [ -z "${argUser}" ] || [ -z "${argPass}" ];then
+    echo "requires --user and --password"
     exit 1
 fi
 
-if [ -z "${argProduction}" ];then
-    echo "No release date specified, try --production YYYY-MM-DD"
-    exit 1
-fi
-
-credentials="--ask-password"
-if [ -n "${argPass}" ];then
-    credentials="--password ${argPass}"
-fi
-
-RELEASE="${REMOTE}/${DIST}/${argProduction}/release/"
-
-mkdir -p "${LOCAL}"
-pushd "${LOCAL}"
-
-# shellcheck disable=SC2086
-wget --user "${argUser}" ${credentials} \
-    --mirror --recursive --no-parent --convert-links "${RELEASE}"
-
-find . -name index.html -0 | xargs rm -f
-
-popd
+# print available release dates
+for release_date in $(
+    curl -u "${argUser}:${argPass}" -s $A_MACHINE/$A_DIST/ | \
+    xmllint --xpath "string(//html/body/pre/a/@href)" -
+);do
+    basename "$release_date"
+done

@@ -11,6 +11,7 @@ Source0:    %{name}-%{version}.tar.gz
 Requires:   whiptail
 Requires:   curl
 Requires:   wget
+Requires:   libxml2-utils
 BuildArch:  noarch
 
 %description
@@ -31,6 +32,8 @@ install -D -m 600 nautilos-repo-setup/ebcl.local \
     %{buildroot}/root/.ebcl.local
 install -D -m 755 nautilos-repo-setup/ebcl-repo-setup \
     %{buildroot}/usr/bin/ebcl-repo-setup
+install -D -m 755 nautilos-repo-setup/ebcl-releases \
+    %{buildroot}/usr/bin/ebcl-releases
 install -D -m 755 nautilos-repo-setup/ebcl-sync \
     %{buildroot}/usr/bin/ebcl-sync
 install -D -m 755 nautilos-repo-setup/ebcl-ui \
@@ -47,6 +50,7 @@ install -D -m 644 nautilos-repo-setup/sib_user_guide.pdf \
 /root/.ebcl.local
 %{_usr}/share/doc/nautilos-repo-setup
 %{_usr}/bin/ebcl-repo-setup
+%{_usr}/bin/ebcl-releases
 %{_usr}/bin/ebcl-sync
 %{_usr}/bin/ebcl-ui
 

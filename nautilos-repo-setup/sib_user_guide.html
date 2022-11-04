@@ -468,7 +468,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Updated</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2022-10-02</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2022-11-04</p></td>
 </tr>
 </tbody>
 </table>
@@ -714,11 +714,19 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 </div>
 <div class="paragraph">
-<p>Setup the EBCL repos as follows:</p>
+<p>Check for available releases as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Select the release date of your choice and setup the EBCL repos as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 </div>
@@ -807,9 +815,20 @@ the <code>~/.ebcl</code> environment as follows:</p>
 <pre>A_SECRET=ARTIFACTORY_SECRET</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Check for available releases as follows:</p>
+</div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Select the release date of your choice and setup the EBCL repos as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -843,9 +862,20 @@ and setup the <code>~/.ebcl</code> environment as follows:</p>
 <pre>A_SECRET=ARTIFACTORY_SECRET</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Check for available releases as follows:</p>
+</div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Select the release date of your choice and setup the EBCL repos as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -895,7 +925,7 @@ system packages to be installed:</p>
 <div class="paragraph">
 <p>The SDK setup process covers among others the installation of the
 <strong>KIWI</strong> (<a href="https://osinside.github.io/kiwi" class="bare">https://osinside.github.io/kiwi</a>) appliance builder which is
-used to build the image from an also be to be installed,
+used to build the image from an also to be installed,
 reference example image description. The following steps describes
 how to install the needed components.</p>
 </div>
@@ -929,11 +959,19 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 </div>
 <div class="paragraph">
-<p>Setup the EBCL repos as follows:</p>
+<p>Check for available releases as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Select the release date of your choice and setup the EBCL repos as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 </div>
@@ -1045,7 +1083,7 @@ image description can be found in the <a href="#use_cases">Customization Use Cas
 <div class="sect2">
 <h3 id="_image_deployment">Image Deployment</h3>
 <div class="paragraph">
-<p>The result of the <strong>build</strong> call is a binary image that runs on
+<p>The result of the <strong>ebcl-build-arm64</strong> call is a binary image that runs on
 the target as it is. This means the deployment of the image to
 the target can be done as follows:</p>
 </div>
@@ -1099,11 +1137,20 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 </div>
 <div class="paragraph">
-<p>Sync repos to your local system. This process takes some time to complete:</p>
+<p>Check for available releases as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-sync --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Select the release date of your choice and sync the repos to your
+local system. This process takes some time to complete:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>sudo ebcl-sync --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1114,22 +1161,8 @@ call <code>ebcl-repo-setup</code> as follows:</p>
 <div class="literalblock">
 <div class="content">
 <pre>sudo ebcl-repo-setup --local \
-    /var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/</pre>
+    /var/tmp/nautilos/artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-releases-generic/YYYY-MM-DD/</pre>
 </div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Warning</div>
-</td>
-<td class="content">
-Using a local repository mirror disconnects the image
-builder from updates until <strong>ebcl-sync</strong> is called again to
-refresh the local copy
-</td>
-</tr>
-</table>
 </div>
 </div>
 </div>
@@ -1225,7 +1258,7 @@ by EB. New use cases are always open to discussions with EB.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-13 10:49:33 UTC
+Last updated 2022-11-04 09:11:38 UTC
 </div>
 </div>
 </body>

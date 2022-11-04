@@ -25,13 +25,40 @@ set -e
 
 declare -a credentials
 declare -a descriptions
+declare -a releases
 declare -x target_dir
 
 export TERM=xterm
 
-A_MACHINE="artifactory.elektrobit.com"
-A_DIST="eb_corbos_linux_nautilos2.0-debian-remote"
-DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
+A_MACHINE=artifactory.elektrobit.com
+A_PRJ_TESTING=eb_corbos_linux_nautilos2.0-debian-remote
+A_PRJ_PRODUCTION=eb_corbos_linux_nautilos2.0-releases-generic
+
+function setup_dist {
+    local distribution
+    distribution=$(
+        whiptail --radiolist "Select EBCL Distribution:" \
+            15 40 5 Production "" on Testing "" off \
+            3>&1 1>&2 2>&3
+    )
+    if [ "${distribution}" = Production ];then
+        eval "$(get_releases_for_selection)"
+        if [ -n "${releases[*]}" ];then
+            A_RELEASE=$(
+                whiptail --radiolist \
+                    "Select EBCL Release:" 20 40 10 "${releases[@]}" \
+                    3>&1 1>&2 2>&3
+            )
+            A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
+        else
+            whiptail --msgbox "No release(s) found" 7 60
+            exit 1
+        fi
+    else
+        A_DIST="${A_PRJ_TESTING}"
+    fi
+    DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
+}
 
 function setup_container_sdk {
     local repo_location=$1
@@ -44,8 +71,13 @@ function setup_container_sdk {
         fi
     else
         get_credentials
-        sudo ebcl-repo-setup --production \
-            --user "${credentials[0]}" --password "${credentials[1]}"
+        if [ -n "${A_RELEASE}" ];then
+            sudo ebcl-repo-setup --production "${A_RELEASE}" \
+                --user "${credentials[0]}" --password "${credentials[1]}"
+        else
+            sudo ebcl-repo-setup --test \
+                --user "${credentials[0]}" --password "${credentials[1]}"
+        fi
     fi
 
     sudo apt --yes install reference-image-description-crinit
@@ -89,6 +121,19 @@ function build_image {
     fi
     # shellcheck disable=SC2086
     sudo $ebcl_build
+}
+
+function get_releases_for_selection {
+    get_credentials
+    local selected=on
+    echo -n "releases=( "
+    for release_date in $(
+        ebcl-releases --user "${credentials[0]}" --password "${credentials[1]}"
+    );do
+        echo -n "${release_date} \"\" ${selected} "
+        selected=off
+    done
+    echo ")"
 }
 
 function get_image_descriptions_for_selection {
@@ -138,11 +183,17 @@ function install_nautilos_repo_setup {
 }
 
 function create_update_local_repo_mirror {
-    get_credentials
-    if [ ! -e "/usr/bin/ebcl-sync" ];then
-        install_nautilos_repo_setup
+    if [ -n "${A_RELEASE}" ];then
+        get_credentials
+        if [ ! -e "/usr/bin/ebcl-sync" ];then
+            install_nautilos_repo_setup
+        fi
+        sudo ebcl-sync --production "${A_RELEASE}" \
+            --user "${credentials[0]}" --password "${credentials[1]}"
+    else
+        whiptail --title "Local Repository Mirror" \
+            --msgbox "Only available for Production Distribution(s)" 7 60
     fi
-    sudo ebcl-sync --user "${credentials[0]}" --password "${credentials[1]}"
 }
 
 # main
@@ -150,6 +201,9 @@ if ! whiptail --version;then
     echo "whiptail not found, run 'sudo apt install whiptail'"
     exit 1
 fi
+
+# select distribution
+setup_dist
 
 # main loop
 while true;do
