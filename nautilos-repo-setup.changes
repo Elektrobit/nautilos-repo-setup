@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Nov  4 14:07:32 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
+
+- Improve usability of ebcl-ui
+
+  Fetch the list of releases only once
+
+-------------------------------------------------------------------
 Fri Nov  4 08:55:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
 
 - Add ebcl-releases

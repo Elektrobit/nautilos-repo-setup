@@ -42,6 +42,9 @@ function setup_dist {
             3>&1 1>&2 2>&3
     )
     if [ "${distribution}" = Production ];then
+        if [ ! -e "/usr/bin/ebcl-releases" ];then
+            install_nautilos_repo_setup
+        fi
         eval "$(get_releases_for_selection)"
         if [ -n "${releases[*]}" ];then
             A_RELEASE=$(
@@ -124,15 +127,24 @@ function build_image {
 }
 
 function get_releases_for_selection {
-    get_credentials
     local selected=on
+    local release_cache=/var/tmp/artifactory_releases
     echo -n "releases=( "
-    for release_date in $(
-        ebcl-releases --user "${credentials[0]}" --password "${credentials[1]}"
-    );do
-        echo -n "${release_date} \"\" ${selected} "
-        selected=off
-    done
+    if [ -f ${release_cache} ];then
+        while read -r release_date;do
+            echo -n "${release_date} \"\" ${selected} "
+            selected=off
+        done < ${release_cache}
+    else
+        get_credentials
+        for release_date in $(
+            ebcl-releases --user "${credentials[0]}" --password "${credentials[1]}"
+        );do
+            echo "${release_date}" >> $release_cache
+            echo -n "${release_date} \"\" ${selected} "
+            selected=off
+        done
+    fi
     echo ")"
 }
 
@@ -167,7 +179,7 @@ function get_credentials {
 }
 
 function install_nautilos_repo_setup {
-    if [ -d ${DISTPATH} ];then
+    if [ -d "${DISTPATH}" ];then
         # shellcheck disable=SC2086
         sudo dpkg --install \
             ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
@@ -176,7 +188,7 @@ function install_nautilos_repo_setup {
         # shellcheck disable=SC2086
         wget --user "${credentials[0]}" --password "${credentials[1]}" \
             --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
-            https://${A_MACHINE}/${A_DIST}/release/xUbuntu_22.04_debbuild/all/
+            https://${A_MACHINE}/${A_PRJ_TESTING}/release/xUbuntu_22.04_debbuild/all/
         # shellcheck disable=SC2012
         sudo dpkg --install "$(ls -1t nautilos-repo-setup* | head -n1)"
     fi
