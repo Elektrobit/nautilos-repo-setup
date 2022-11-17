@@ -23,9 +23,9 @@
 #
 set -e
 
-declare -a credentials
-declare -a descriptions
-declare -a releases
+declare -ax credentials
+declare -ax descriptions
+declare -ax releases
 declare -x target_dir
 
 export TERM=xterm
