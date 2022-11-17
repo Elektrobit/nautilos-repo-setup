@@ -73,9 +73,12 @@ if [ -z "${argUser}" ] || [ -z "${argPass}" ];then
 fi
 
 # print available release dates
-for release_date in $(
+for href in $(
     curl -u "${argUser}:${argPass}" -s $A_MACHINE/$A_DIST/ | \
-    xmllint --xpath "string(//html/body/pre/a/@href)" -
+    xmllint --xpath "/html/body/pre/a/@href" -
 );do
-    basename "$release_date"
+    release_date=$(echo "${href}" | awk -F\" '{ print $2 }')
+    if [[ ${release_date} =~ /$ ]];then
+        basename "$release_date"
+    fi
 done
