@@ -263,10 +263,10 @@ while true;do
                         else
                             build_image "${image_description}" "remote_repos"
                         fi
-                        for result in "${target_dir}"/*.raw;do
-                            whiptail --msgbox "${result}" --title "Image Binary" 8 78
-                            break
-                        done
+                        result_image=$(ls -1 "${target_dir}"/*.raw 2>/dev/null)
+                        if [ -e "${result_image}" ];then
+                            whiptail --msgbox "${result_image}" --title "Image Binary" 8 78
+                        fi
                     fi
                 else
                     whiptail --msgbox "No image description(s) found" 7 60
