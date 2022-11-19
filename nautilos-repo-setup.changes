@@ -1,12 +1,21 @@
 -------------------------------------------------------------------
-Fri Nov  4 14:07:32 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
+Sat Nov 19 13:26:25 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Only show dialog for result image if it exists
+- Ask for credentials only once
+- Fix release directory retrieval
+    
+  The xmllint expression did not match all attributes
+
+-------------------------------------------------------------------
+Fri Nov  4 14:07:32 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Improve usability of ebcl-ui
 
   Fetch the list of releases only once
 
 -------------------------------------------------------------------
-Fri Nov  4 08:55:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
+Fri Nov  4 08:55:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Add ebcl-releases
 
@@ -14,7 +23,7 @@ Fri Nov  4 08:55:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
   able to work with the release artifactory project
 
 -------------------------------------------------------------------
-Fri Oct 28 07:52:13 UTC 2022 - Marcus Schäfer <marcus.schaefer@gmail.com>
+Fri Oct 28 07:52:13 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Delete devel repo references
 
