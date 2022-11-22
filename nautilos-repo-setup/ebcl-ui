@@ -189,8 +189,9 @@ function install_nautilos_repo_setup {
         wget --user "${credentials[0]}" --password "${credentials[1]}" \
             --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
             https://${A_MACHINE}/${A_PRJ_TESTING}/release/xUbuntu_22.04_debbuild/all/
+        sudo apt update
         # shellcheck disable=SC2012
-        sudo dpkg --install "$(ls -1t nautilos-repo-setup* | head -n1)"
+        sudo apt --yes install "./$(ls -1t nautilos-repo-setup* | head -n1)"
     fi
 }
 

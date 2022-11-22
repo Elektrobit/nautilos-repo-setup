@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Nov 22 14:33:24 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Use apt for install of nautilos-repo-setup
+
+  Using apt instead of dpkg allows to auto resolve the
+  tool dependencies of the ebcl-ui program.
+
+-------------------------------------------------------------------
 Sat Nov 19 13:26:25 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Only show dialog for result image if it exists
