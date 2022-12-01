@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  1 08:39:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Update documentation 
+
+-------------------------------------------------------------------
 Tue Nov 22 14:33:24 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Use apt for install of nautilos-repo-setup

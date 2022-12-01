@@ -444,34 +444,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_build_target_images">Build Target Image(s)</h2>
 <div class="sectionbody">
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Status</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Proposed</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Type</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User Guide</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Author</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Marcus Schäfer &lt;<a href="mailto:marcus.schaefer@elektrobit.com">marcus.schaefer@elektrobit.com</a>&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sponsor</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Petersohn Jens &lt;<a href="mailto:Jens.Petersohn@elektrobit.com">Jens.Petersohn@elektrobit.com</a>&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Updated</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2022-11-04</p></td>
-</tr>
-</tbody>
-</table>
 <div class="paragraph">
 <p>The EB Corbos Linux (EBCL) OS, codename NautilOS, will be delivered as
 software repositories including binary and source packages based on the Ubuntu
@@ -502,13 +474,20 @@ setup a SDK host and how to get started building target image(s).</p>
 Please make sure to have your account details (username and password) at hand.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_sdk_hardware_requirements">SDK hardware requirements</h3>
+<div class="paragraph">
+<p>No matter if the SDK runs on virtual- or real hardware, a minimum of 4G of RAM
+space and 10G of <strong>free</strong> storage space are required !</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="quick">Quick Start</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If not installed, download the <code>ebcl-ui</code> utility from here:
+<p>For the quick setup process, the <code>ebcl-ui</code> utility is provided here:
 <a href="https://github.com/Elektrobit/nautilos-repo-setup/raw/master/nautilos-repo-setup/ebcl-ui">ebcl-ui</a></p>
 </div>
 <div class="admonitionblock note">
@@ -519,13 +498,15 @@ Please make sure to have your account details (username and password) at hand.</
 </td>
 <td class="content">
 Access is still protected even though we plan to opensource it.
-In case access is denied please get in contact.
+In case access is denied please get in <a href="#contact">Contact</a> with the Elektrobit
+Linux team.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Once installed call:</p>
+<p>Fetch <code>ebcl-ui</code> and store it on the desired SDK machine.
+Once available call:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -718,7 +699,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -794,10 +775,22 @@ as follows:<br></p>
 <h2 id="amazon_ec2">SDK as AWS EC2 Cloud Instance (x86_64, aarch64)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There are Amazon EC2 images for x86_64 and aarch64 available
-at: <a href="https://ebs.ebgroup.elektrobit.com/package/show/nautilos:2.0:devel:images/nautilos-builder-ec2:">nautilos-builder-ec2</a>.
-The images can be uploaded and registered as AMI&#8217;s (Amazon Machine Image).
-For further details how to register images in EC2 please contact us.</p>
+<p>In the Continental/Elektrobit organisation at Amazon, there are
+registrations for AWS EC2 AMI&#8217;s (Amazon Machine Images) for the
+x86_64 and aarch64 architectures. Along with the business contract
+the respective AMI IDs can be shared with the customer account.
+Once this is done start an instance of the SDK AMI either through
+the AWS web console or using the commandline interface as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>aws ec2 run-instances \
+  --count 1 \
+  --image-id SDK-AMI-ID \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=SDK}]' \
+  --instance-type AWS-EC2-INSTANCE-TYPE \
+  --key-name SSH-KEY-PAIR-NAME</pre>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_environment_setup">Environment Setup</h3>
@@ -820,7 +813,7 @@ the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -842,9 +835,23 @@ the <code>~/.ebcl</code> environment as follows:</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To setup a SDK system on a <strong>RaspberryPI</strong> dump the
-<strong>uncompressed</strong> image from: <a href="http://repos.ebgroup.elektrobit.com/nautilos:/2.0:/devel:/images/images/nautilos-builder-rpi.aarch64.raw.xz:">nautilos-builder-rpi</a> on a SD card
-and boot it up on a <strong>Raspberry Pi 4 Model B</strong> with either 4G
+<strong>uncompressed</strong> image from: <a href="http://repos.ebgroup.elektrobit.com/nautilos:/2.0:/devel:/images/images/nautilos-builder-rpi.aarch64.raw.xz">nautilos-builder-rpi</a>
+on a SD card and boot it up on a <strong>Raspberry Pi 4 Model B</strong> with either 4G
 (better 8G) of RAM space.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Access to the <strong>RaspberryPI</strong> image requires access to the Elektrobit
+Build Service. In case access is denied please get in <a href="#contact">Contact</a> with the
+Elektrobit Linux team.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
 <h3 id="_environment_setup_2">Environment Setup</h3>
@@ -867,7 +874,7 @@ and setup the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -901,8 +908,8 @@ an Ubuntu 22.04 (jammy) based host system.</p>
 <td class="content">
 It is not mandatory to use Ubuntu 22.04 (jammy) as build
 host OS. However, different instructions to install the required
-components are needed. In this case please consult EB for further
-details.
+components are needed. In this case please get in <a href="#contact">Contact</a>
+with the Elektrobit Linux team.
 </td>
 </tr>
 </table>
@@ -963,7 +970,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1074,8 +1081,8 @@ ebcl-build-arm64 \
 Depending on the image setup additional <strong>build</strong> options might
 be required. For example building images with custom signing and or
 security keys requires them to be provided and referenced at call
-time. Details about customization options and how to work with the
-image description can be found in the <a href="#use_cases">Customization Use Cases</a> user guide.
+time. Details about customization options can be found at:
+<a href="#use_cases">Customization Use Cases</a>
 </td>
 </tr>
 </table>
@@ -1141,7 +1148,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1190,7 +1197,7 @@ system. It&#8217;s main use case is to demo the crinit
 process manager.</p>
 </li>
 <li>
-<p><strong>reference-image-description-verity (WIP)</strong><br>
+<p><strong>reference-image-description-verity</strong><br>
 Based on the <code>reference-image-description-crinit</code>, adding a
 runtime verity hash check on top of the root device using
 <strong>dm-verity</strong>. It&#8217;s main use case is to demo the
@@ -1198,7 +1205,7 @@ verity hash device mapper capability on a read-only
 rootfs</p>
 </li>
 <li>
-<p><strong>reference-image-description-integrity (WIP)</strong><br>
+<p><strong>reference-image-description-integrity</strong><br>
 Based on the <code>reference-image-description-crinit</code>, but using a
 writable root filesystem (EXT4 or XFS) which is runtime integrity
 checked on top of the root device using <strong>dm-integrity</strong>.
@@ -1206,14 +1213,14 @@ It&#8217;s main use case is to demo the integrity hash checking
 on a read-write rootfs</p>
 </li>
 <li>
-<p><strong>reference-image-description-crypt (WIP)</strong><br>
+<p><strong>reference-image-description-crypt</strong><br>
 Based on the <code>reference-image-description-jammy</code>, but using an
 encrypted and integrity checked root filesystem using <strong>LUKS</strong>.
 It&#8217;s main use case is to demo full rootfs encryption on a
 read-write rootfs</p>
 </li>
 <li>
-<p><strong>reference-image-description-container-app (WIP)</strong><br>
+<p><strong>reference-image-description-container-app</strong><br>
 Based on the <code>reference-image-description-verity</code>, but using a
 a specific partition layout and tools to serve as immutable
 container based operating system. More information about
@@ -1231,14 +1238,12 @@ the design and tooling can be found at<br>
 <p>A KIWI based image description allows users to create all kinds of
 images with different configurations, features and functionality.
 In the scope of the automotive industry and with EBCL as the OS platform,
-there is a list of use cases for which we provide instructions
-how to apply them based on the existing reference example image descriptions.
-The information covers topics like how to handle security keys,
+there are a number of possible scenarios like how to handle security keys,
 how to add a container image, how to change the system configuration
-and more.</p>
-</div>
-<div class="paragraph">
-<p><a href="http://reference_documentation_customer_use_cases" class="bare">http://reference_documentation_customer_use_cases</a></p>
+and more. In the scope of the SDK we support customers with these tasks
+by providing tools, reference example image descriptions and consulting.
+For further details how to produce a production ready image please get
+in <a href="#contact">Contact</a> with the Elektrobit Linux team</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1248,17 +1253,34 @@ and more.</p>
 </td>
 <td class="content">
 Provided example images are subject to change and has no warranty
-by EB. New use cases are always open to discussions with EB.
+by Elektrobit. New use cases are always open to discussions with Elektrobit.
 </td>
 </tr>
 </table>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="contact">Contact</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Elektrobit Linux team</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="mailto:sales@elektrobit.com">sales@elektrobit.com</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-04 09:11:38 UTC
+Last updated 2022-12-01 08:37:28 UTC
 </div>
 </div>
 </body>
