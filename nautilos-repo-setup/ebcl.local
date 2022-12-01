@@ -3,12 +3,10 @@
 
 A_DIST=__DISTPATH__
 
-A_REPO_SERVER=dir://$A_DIST
-
 function clean_repo {
     for source in /etc/apt/sources.list.d/*.sources;do
-        if grep -q $A_DIST $source;then
-            rm -f $source
+        if grep -q $A_DIST "${source}";then
+            rm -f "${source}"
         fi
     done
 }
@@ -24,12 +22,17 @@ function add_repo_key {
 
 function add_repo {
     local A_PRJ=$1
-    local source_file_name=$(echo $A_PRJ | tr "/" "_")
-    cat >/etc/apt/sources.list.d/${source_file_name}.sources <<- EOF
+    local source_file_name
+    source_file_name=$(echo "$A_PRJ" | tr "/" "_")
+    cat >/etc/apt/sources.list.d/"${source_file_name}".sources <<- EOF
 		Types: deb
 		URIs: file://$A_DIST/$A_PRJ/
 		Suites: ./
 		trusted: yes
 		check-valid-until: no
 	EOF
+}
+
+function get_repo_server {
+    echo "dir://$A_DIST"
 }

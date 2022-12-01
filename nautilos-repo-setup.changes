@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  1 11:32:45 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Don't host any credentials in env files
+
+-------------------------------------------------------------------
 Thu Dec  1 08:39:27 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Update documentation 

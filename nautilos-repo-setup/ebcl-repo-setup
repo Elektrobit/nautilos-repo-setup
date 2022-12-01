@@ -132,11 +132,6 @@ cp "${ebcl_profile}" ~/.ebcl
 
 # update template with parameter settings
 if [ ! ${dist_mode} = "local" ];then
-    if [ -n "${argUser}" ] && [ -n "${argPass}" ];then
-        echo "Updating credentials in ~/.ebcl"
-        sed -i -es"@__USER__@${argUser}@" ~/.ebcl
-        sed -i -es"@__PASS__@${argPass}@" ~/.ebcl
-    fi
     if [ -n "${argProduction}" ];then
         echo "Updating release in ~/.ebcl"
         sed -i -es"@__RELEASE__@${argProduction}@" ~/.ebcl
@@ -154,11 +149,11 @@ if [ -z "${argNoInit}" ];then
     echo "Setup EBCL repositories..."
     clean_repo
 
-    init_auth
+    init_auth "${argUser}" "${argPass}"
 
     # NautilOS release repositories
-    add_repo release/containers
-    add_repo release/xUbuntu_22.04_debbuild
+    add_repo release/containers "${argUser}" "${argPass}"
+    add_repo release/xUbuntu_22.04_debbuild "${argUser}" "${argPass}"
 
     apt-get update
 fi
