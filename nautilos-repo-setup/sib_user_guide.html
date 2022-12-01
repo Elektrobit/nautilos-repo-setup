@@ -674,24 +674,14 @@ latest <code>nautilos-repo-setup</code> package as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>wget --user $A_USER --password $A_SECRET \
+<pre>wget --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET \
     --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
 https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/release/xUbuntu_22.04_debbuild/all/</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo dpkg --install $(ls -1t nautilos-repo-setup* | head -n1)</pre>
+<pre>sudo apt install nautilos-repo-setup_LATEST_VERSION.deb</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -699,7 +689,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -707,7 +697,8 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD \
+    --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 </div>
@@ -795,25 +786,12 @@ the AWS web console or using the commandline interface as follows:</p>
 <div class="sect2">
 <h3 id="_environment_setup">Environment Setup</h3>
 <div class="paragraph">
-<p>Once the EC2 SDK instance is running, login via ssh (user ubuntu) and setup
-the <code>~/.ebcl</code> environment as follows:</p>
+<p>Once the EC2 SDK instance is running, login via ssh (user ubuntu) and
+check for available releases as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Check for available releases as follows:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -821,7 +799,8 @@ the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD \
+    --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -857,24 +836,11 @@ Elektrobit Linux team.
 <h3 id="_environment_setup_2">Environment Setup</h3>
 <div class="paragraph">
 <p>Once the Raspberry Pi is running, login (user root, default pass: <strong>linux</strong>)
-and setup the <code>~/.ebcl</code> environment as follows:</p>
+and check for available releases as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Check for available releases as follows:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -882,7 +848,8 @@ and setup the <code>~/.ebcl</code> environment as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET --no-init</pre>
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD \
+    --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET --no-init</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -945,24 +912,14 @@ latest <code>nautilos-repo-setup</code> package as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>wget --user $A_USER --password $A_SECRET \
+<pre>wget --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET \
     --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
 https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/release/xUbuntu_22.04_debbuild/all/</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo dpkg --install $(ls -1t nautilos-repo-setup* | head -n1)</pre>
+<pre>sudo apt install nautilos-repo-setup_LATEST_VERSION.deb</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -970,7 +927,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -978,7 +935,8 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-repo-setup --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-repo-setup --production YYYY-MM-DD \
+    --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 </div>
@@ -1065,7 +1023,7 @@ as an example can be done as follows.</p>
 <pre>source ~/.ebcl
 ebcl-build-arm64 \
     --description /usr/share/kiwi/nautilos/reference-image-description-crinit/nxp \
-    --repo-server $A_REPO_SERVER \
+    --repo-server $(get_repo_server ARTIFACTORY_USER_NAME ARTIFACTORY_SECRET) \
     --dist-prefix none \
     --profile RO \
     --local</pre>
@@ -1115,32 +1073,19 @@ that repositories to the local system first. To run this sync operation,
 call <strong>ebcl-sync</strong> as follows:</p>
 </div>
 <div class="paragraph">
-<p>Setup Artifactory access credentials:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_USER=ARTIFACTORY_USER_NAME</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>A_SECRET=ARTIFACTORY_SECRET</pre>
-</div>
-</div>
-<div class="paragraph">
 <p><strong>If not already done</strong>, download and install the latest
 <code>nautilos-repo-setup</code> package as follows:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>wget --user $A_USER --password $A_SECRET \
+<pre>wget --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET \
     --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
 https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/release/xUbuntu_22.04_debbuild/all/</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo dpkg --install $(ls -1t nautilos-repo-setup* | head -n1)</pre>
+<pre>sudo apt install nautilos-repo-setup_LATEST_VERSION.deb</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1148,7 +1093,7 @@ https://artifactory.elektrobit.com/eb_corbos_linux_nautilos2.0-debian-remote/rel
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>ebcl-releases --user $A_USER --password $A_SECRET</pre>
+<pre>ebcl-releases --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1157,7 +1102,8 @@ local system. This process takes some time to complete:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>sudo ebcl-sync --production YYYY-MM-DD --user $A_USER --password $A_SECRET</pre>
+<pre>sudo ebcl-sync --production YYYY-MM-DD \
+    --user ARTIFACTORY_USER_NAME --password ARTIFACTORY_SECRET</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1280,7 +1226,7 @@ by Elektrobit. New use cases are always open to discussions with Elektrobit.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-12-01 08:37:28 UTC
+Last updated 2022-12-01 14:23:12 UTC
 </div>
 </div>
 </body>
