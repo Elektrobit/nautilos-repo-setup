@@ -34,6 +34,19 @@ A_MACHINE=artifactory.elektrobit.com
 A_PRJ_TESTING=eb_corbos_linux_nautilos2.0-debian-remote
 A_PRJ_PRODUCTION=eb_corbos_linux_nautilos2.0-releases-generic
 
+function get_ebcl_releases {
+    get_credentials
+    for href in $(
+        curl -u "${credentials[0]}:${credentials[1]}" -s https://$A_MACHINE/$A_PRJ_PRODUCTION/ | \
+        xmllint --xpath "/html/body/pre/a/@href" -
+    );do
+        release_date=$(echo "${href}" | awk -F\" '{ print $2 }')
+        if [[ ${release_date} =~ /$ ]];then
+            basename "$release_date"
+        fi
+    done
+}
+
 function setup_dist {
     local distribution
     distribution=$(
@@ -42,9 +55,6 @@ function setup_dist {
             3>&1 1>&2 2>&3
     )
     if [ "${distribution}" = Production ];then
-        if [ ! -e "/usr/bin/ebcl-releases" ];then
-            install_nautilos_repo_setup
-        fi
         eval "$(get_releases_for_selection)"
         if [ -n "${releases[*]}" ];then
             A_RELEASE=$(
@@ -101,12 +111,14 @@ function build_image {
     local image_description=$1
     local repo_location=$2
     local repo_server
+    local repo_credentials
     target_dir="/var/tmp/image"
     if [ "${repo_location}" = "local_repos" ];then
         repo_server="dir://${DISTPATH}"
     else
         get_credentials
-        repo_server="https://${credentials[0]}:${credentials[1]}@${A_MACHINE}/${A_DIST}"
+        repo_server="https://${A_MACHINE}/${A_DIST}"
+        repo_credentials="${credentials[0]}:${credentials[1]}"
     fi
 
     if [[ ${image_description} =~ /nxp ]];then
@@ -118,6 +130,9 @@ function build_image {
     ebcl_build="$ebcl_build --description ${image_description}"
     ebcl_build="$ebcl_build --repo-server ${repo_server}"
     ebcl_build="$ebcl_build --dist-prefix none --local --clean"
+    if [ -n "${repo_credentials}" ];then
+        ebcl_build="$ebcl_build --repo-credentials ${repo_credentials}"
+    fi
     if [[ ${image_description} =~ reference-image-description-crinit ]];then
         ebcl_build="$ebcl_build --profile RO"
         target_dir="${target_dir}.RO"
@@ -136,10 +151,7 @@ function get_releases_for_selection {
             selected=off
         done < ${release_cache}
     else
-        get_credentials
-        for release_date in $(
-            ebcl-releases --user "${credentials[0]}" --password "${credentials[1]}"
-        );do
+        for release_date in $(get_ebcl_releases);do
             echo "${release_date}" >> $release_cache
             echo -n "${release_date} \"\" ${selected} "
             selected=off
@@ -188,7 +200,7 @@ function install_nautilos_repo_setup {
         # shellcheck disable=SC2086
         wget --user "${credentials[0]}" --password "${credentials[1]}" \
             --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
-            https://${A_MACHINE}/${A_PRJ_TESTING}/release/xUbuntu_22.04_debbuild/all/
+            https://${A_MACHINE}/${A_DIST}/release/xUbuntu_22.04_debbuild/all/
         sudo apt update
         # shellcheck disable=SC2012
         sudo apt --yes install "./$(ls -1t nautilos-repo-setup* | head -n1)"
@@ -198,9 +210,6 @@ function install_nautilos_repo_setup {
 function create_update_local_repo_mirror {
     if [ -n "${A_RELEASE}" ];then
         get_credentials
-        if [ ! -e "/usr/bin/ebcl-sync" ];then
-            install_nautilos_repo_setup
-        fi
         sudo ebcl-sync --production "${A_RELEASE}" \
             --user "${credentials[0]}" --password "${credentials[1]}"
     else
@@ -210,13 +219,32 @@ function create_update_local_repo_mirror {
 }
 
 # main
-if ! whiptail --version;then
+if ! whiptail --version &>/dev/null;then
     echo "whiptail not found, run 'sudo apt install whiptail'"
+    exit 1
+fi
+if ! curl --version &>/dev/null;then
+    echo "curl not found, run 'sudo apt install curl'"
+    exit 1
+fi
+if ! wget --version &>/dev/null;then
+    echo "wget not found, run 'sudo apt install wget'"
     exit 1
 fi
 
 # select distribution
 setup_dist
+
+# install nautilos-repo-setup matching dist selection
+if ! dpkg -s nautilos-repo-setup &>/dev/null;then
+    install_nautilos_repo_setup
+    if [ "$0" != "/usr/bin/ebcl-ui" ];then
+        # delete initial drop of ebcl-ui in favor of the one
+        # installed with the nautilos-repo-setup package
+        rm -f "$0"
+    fi
+    exec /usr/bin/ebcl-ui
+fi
 
 # main loop
 while true;do
@@ -233,9 +261,6 @@ while true;do
             create_update_local_repo_mirror
             ;;
         2)
-            if [ ! -e "/usr/bin/ebcl-repo-setup" ];then
-                install_nautilos_repo_setup
-            fi
             if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
                 if [ -d "${DISTPATH}" ];then
                     setup_container_sdk "local_repos"
