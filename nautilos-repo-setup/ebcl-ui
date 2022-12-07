@@ -231,6 +231,10 @@ if ! wget --version &>/dev/null;then
     echo "wget not found, run 'sudo apt install wget'"
     exit 1
 fi
+if ! xmllint --version  &>/dev/null;then
+    echo "xmllint not found, run 'sudo apt install libxml2-utils'"
+    exit 1
+fi
 
 # select distribution
 setup_dist
