@@ -37,8 +37,8 @@ A_PRJ_PRODUCTION=eb_corbos_linux_nautilos2.0-releases-generic
 function get_ebcl_releases {
     get_credentials
     for href in $(
-        curl -u "${credentials[0]}:${credentials[1]}" -s https://$A_MACHINE/$A_PRJ_PRODUCTION/ | \
-        xmllint --xpath "/html/body/pre/a/@href" -
+        curl -u "${credentials[0]}:${credentials[1]}" -s https://$A_MACHINE/$A_PRJ_PRODUCTION/ 2>/dev/null | \
+        xmllint --xpath "/html/body/pre/a/@href" - 2>/dev/null
     );do
         release_date=$(echo "${href}" | awk -F\" '{ print $2 }')
         if [[ ${release_date} =~ /$ ]];then
@@ -48,27 +48,25 @@ function get_ebcl_releases {
 }
 
 function setup_dist {
-    local distribution
-    distribution=$(
-        whiptail --radiolist "Select EBCL Distribution:" \
-            15 40 5 Production "" on Testing "" off \
-            3>&1 1>&2 2>&3
-    )
-    if [ "${distribution}" = Production ];then
-        eval "$(get_releases_for_selection)"
-        if [ -n "${releases[*]}" ];then
-            A_RELEASE=$(
-                whiptail --radiolist \
-                    "Select EBCL Release:" 20 40 10 "${releases[@]}" \
-                    3>&1 1>&2 2>&3
-            )
-            A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
-        else
-            whiptail --msgbox "No release(s) found" 7 60
-            exit 1
-        fi
+    local release=$1
+    local test_flag=off
+    if [ -n "${release}" ];then
+        A_RELEASE="${release}"
     else
+        eval "$(get_releases_for_selection)"
+        if [ -z "${releases[*]}" ];then
+            test_flag=on
+        fi
+        A_RELEASE=$(
+            whiptail --radiolist "Select EBCL Distribution:" \
+                20 40 10 "${releases[@]}" Testing "" "${test_flag}" \
+                3>&1 1>&2 2>&3
+        )
+    fi
+    if [ "${A_RELEASE}" = Testing ];then
         A_DIST="${A_PRJ_TESTING}"
+    else
+        A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
     fi
     DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
 }
@@ -84,11 +82,11 @@ function setup_container_sdk {
         fi
     else
         get_credentials
-        if [ -n "${A_RELEASE}" ];then
-            sudo ebcl-repo-setup --production "${A_RELEASE}" \
+        if [ "${A_RELEASE}" = Testing ];then
+            sudo ebcl-repo-setup --test \
                 --user "${credentials[0]}" --password "${credentials[1]}"
         else
-            sudo ebcl-repo-setup --test \
+            sudo ebcl-repo-setup --production "${A_RELEASE}" \
                 --user "${credentials[0]}" --password "${credentials[1]}"
         fi
     fi
@@ -143,20 +141,11 @@ function build_image {
 
 function get_releases_for_selection {
     local selected=on
-    local release_cache=/var/tmp/artifactory_releases
     echo -n "releases=( "
-    if [ -f ${release_cache} ];then
-        while read -r release_date;do
-            echo -n "${release_date} \"\" ${selected} "
-            selected=off
-        done < ${release_cache}
-    else
-        for release_date in $(get_ebcl_releases);do
-            echo "${release_date}" >> $release_cache
-            echo -n "${release_date} \"\" ${selected} "
-            selected=off
-        done
-    fi
+    for release_date in $(get_ebcl_releases);do
+        echo -n "${release_date} \"\" ${selected} "
+        selected=off
+    done
     echo ")"
 }
 
@@ -187,7 +176,7 @@ function get_credentials {
             3>&1 1>&2 2>&3
         )
     fi
-    eval "credentials=( \"${user}\" \"${secret}\" )"
+    eval "export credentials=( \"${user}\" \"${secret}\" )"
 }
 
 function install_nautilos_repo_setup {
@@ -208,46 +197,50 @@ function install_nautilos_repo_setup {
 }
 
 function create_update_local_repo_mirror {
-    if [ -n "${A_RELEASE}" ];then
+    if [ "${A_RELEASE}" = Testing ];then
+        whiptail --title "Local Repository Mirror" \
+            --msgbox "Only available for Production Distribution(s)" 7 60
+    else
         get_credentials
         sudo ebcl-sync --production "${A_RELEASE}" \
             --user "${credentials[0]}" --password "${credentials[1]}"
-    else
-        whiptail --title "Local Repository Mirror" \
-            --msgbox "Only available for Production Distribution(s)" 7 60
     fi
+}
+
+function need_software {
+    local tool_name=$1
+    echo "${tool_name} not found, run apt as follows:"
+    echo "sudo apt update"
+    echo "sudo apt install ${tool_name}"
+    exit 1
 }
 
 # main
 if ! whiptail --version &>/dev/null;then
-    echo "whiptail not found, run 'sudo apt install whiptail'"
-    exit 1
+    need_software whiptail
 fi
 if ! curl --version &>/dev/null;then
-    echo "curl not found, run 'sudo apt install curl'"
-    exit 1
+    need_software curl
 fi
 if ! wget --version &>/dev/null;then
-    echo "wget not found, run 'sudo apt install wget'"
-    exit 1
+    need_software wget
 fi
 if ! xmllint --version  &>/dev/null;then
-    echo "xmllint not found, run 'sudo apt install libxml2-utils'"
-    exit 1
+    need_software libxml2-utils
 fi
 
 # select distribution
-setup_dist
+setup_dist "$1"
 
 # install nautilos-repo-setup matching dist selection
 if ! dpkg -s nautilos-repo-setup &>/dev/null;then
     install_nautilos_repo_setup
     if [ "$0" != "/usr/bin/ebcl-ui" ];then
         # delete initial drop of ebcl-ui in favor of the one
-        # installed with the nautilos-repo-setup package
+        # that gets installed with the nautilos-repo-setup package
         rm -f "$0"
     fi
-    exec /usr/bin/ebcl-ui
+    exec /usr/bin/ebcl-ui "${A_RELEASE}"
 fi
 
 # main loop
