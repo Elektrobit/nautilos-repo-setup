@@ -35,10 +35,10 @@ A_PRJ_TESTING=eb_corbos_linux_nautilos2.0-debian-remote
 A_PRJ_PRODUCTION=eb_corbos_linux_nautilos2.0-releases-generic
 
 function get_ebcl_releases {
-    get_credentials
     for href in $(
-        curl -u "${credentials[0]}:${credentials[1]}" -s https://$A_MACHINE/$A_PRJ_PRODUCTION/ 2>/dev/null | \
-        xmllint --xpath "/html/body/pre/a/@href" - 2>/dev/null
+        curl -u "${credentials[0]}:${credentials[1]}" \
+            -s https://$A_MACHINE/$A_PRJ_PRODUCTION/ 2>/dev/null |\
+            xmllint --xpath "/html/body/pre/a/@href" - 2>/dev/null
     );do
         release_date=$(echo "${href}" | awk -F\" '{ print $2 }')
         if [[ ${release_date} =~ /$ ]];then
@@ -81,7 +81,6 @@ function setup_container_sdk {
             return
         fi
     else
-        get_credentials
         if [ "${A_RELEASE}" = Testing ];then
             sudo ebcl-repo-setup --test \
                 --user "${credentials[0]}" --password "${credentials[1]}"
@@ -114,7 +113,6 @@ function build_image {
     if [ "${repo_location}" = "local_repos" ];then
         repo_server="dir://${DISTPATH}"
     else
-        get_credentials
         repo_server="https://${A_MACHINE}/${A_DIST}"
         repo_credentials="${credentials[0]}:${credentials[1]}"
     fi
@@ -185,10 +183,10 @@ function install_nautilos_repo_setup {
         sudo dpkg --install \
             ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
     else
-        get_credentials
         # shellcheck disable=SC2086
         wget --user "${credentials[0]}" --password "${credentials[1]}" \
-            --recursive --no-directories --no-parent -A 'nautilos-repo-setup*.deb' \
+            --recursive --no-directories \
+            --no-parent -A 'nautilos-repo-setup*.deb' \
             https://${A_MACHINE}/${A_DIST}/release/xUbuntu_22.04_debbuild/all/
         sudo apt update
         # shellcheck disable=SC2012
@@ -201,7 +199,6 @@ function create_update_local_repo_mirror {
         whiptail --title "Local Repository Mirror" \
             --msgbox "Only available for Production Distribution(s)" 7 60
     else
-        get_credentials
         sudo ebcl-sync --production "${A_RELEASE}" \
             --user "${credentials[0]}" --password "${credentials[1]}"
     fi
@@ -228,6 +225,9 @@ fi
 if ! xmllint --version  &>/dev/null;then
     need_software libxml2-utils
 fi
+
+# get artifactory credentials
+get_credentials
 
 # select distribution
 setup_dist "$1"
@@ -270,16 +270,20 @@ while true;do
             ;;
         3)
             if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-                whiptail --msgbox "SDK not configured, run SDK Setup first !" 7 60
+                whiptail --msgbox \
+                    "SDK not configured, run SDK Setup first !" 7 60
             else
                 eval "$(get_image_descriptions_for_selection)"
                 if [ -n "${descriptions[*]}" ];then
-                    image_description=$(
-                        whiptail --radiolist \
-                            "Select Image Description:" 20 78 10 "${descriptions[@]}" \
+                    image_store=/usr/share/kiwi/nautilos
+                    if ! image_description=$(
+                        whiptail --radiolist "Select Image Description:" \
+                            20 78 10 "${descriptions[@]}" \
                             3>&1 1>&2 2>&3
-                    )
-                    image_description="/usr/share/kiwi/nautilos/${image_description}"
+                    ); then
+                        continue
+                    fi
+                    image_description="${image_store}/${image_description}"
                     if [ -d "${image_description}" ];then
                         if [ -d "${DISTPATH}" ];then
                             build_image "${image_description}" "local_repos"
@@ -288,7 +292,8 @@ while true;do
                         fi
                         result_image=$(ls -1 "${target_dir}"/*.raw 2>/dev/null)
                         if [ -e "${result_image}" ];then
-                            whiptail --msgbox "${result_image}" --title "Image Binary" 8 78
+                            whiptail --msgbox "${result_image}" \
+                                --title "Image Binary" 8 78
                         fi
                     fi
                 else
