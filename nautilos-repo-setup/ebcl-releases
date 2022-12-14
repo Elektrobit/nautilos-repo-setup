@@ -29,6 +29,7 @@ A_DIST=eb_corbos_linux_nautilos2.0-releases-generic
 ARGUMENT_LIST=(
     "user:"
     "password:"
+    "ask-password"
 )
 
 # read arguments
@@ -41,6 +42,8 @@ if ! opts=$(getopt \
     echo "ebcl-releases"
     echo "  --user <user>"
     echo "      Artifactory user name"
+    echo "  --ask-password"
+    echo "      Ask for credentials"
     echo "  --password <pass>"
     echo "      Artifactory password"
     exit 1
@@ -55,6 +58,11 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
 
+        --ask-password)
+            argAskPass=1
+            shift
+            ;;
+
         --password)
             argPass=$2
             shift 2
@@ -67,15 +75,27 @@ while [[ $# -gt 0 ]]; do
 done
 
 # sanity checks
-if [ -z "${argUser}" ] || [ -z "${argPass}" ];then
-    echo "requires --user and --password"
+if [ -z "${argUser}" ];then
+    echo "requires --user"
     exit 1
 fi
 
+if [ "${argAskPass}" ];then
+    options="--user ${argUser}"
+else
+    options="-u ${argUser}:${argPass}"
+fi
+
+curl_out=$(mktemp)
+# shellcheck disable=SC2064
+trap "rm -f ${curl_out}" EXIT
+
+# shellcheck disable=SC2086
+curl ${options} -s $A_MACHINE/$A_DIST/ > "${curl_out}"
+
 # print available release dates
 for href in $(
-    curl -u "${argUser}:${argPass}" -s $A_MACHINE/$A_DIST/ | \
-    xmllint --xpath "/html/body/pre/a/@href" -
+    xmllint --xpath "/html/body/pre/a/@href" "${curl_out}" 2>/dev/null
 );do
     release_date=$(echo "${href}" | awk -F\" '{ print $2 }')
     if [[ ${release_date} =~ /$ ]];then

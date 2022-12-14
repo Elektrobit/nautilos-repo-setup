@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 14 13:21:42 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Support ask for credentials in all ebcl- tools
+
+-------------------------------------------------------------------
 Thu Dec  1 11:32:45 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Don't host any credentials in env files

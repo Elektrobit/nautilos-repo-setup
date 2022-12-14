@@ -26,6 +26,7 @@ set -e
 ARGUMENT_LIST=(
     "user:"
     "password:"
+    "ask-password"
     "no-init"
     "local:"
     "production:"
@@ -51,6 +52,8 @@ if ! opts=$(getopt \
     echo "      Artifactory user name"
     echo "  --password <pass>"
     echo "      Artifactory password"
+    echo "  --ask-password"
+    echo "      Ask for credentials"
     echo "  --no-init"
     echo "      Setup environment but do not create"
     echo "      apt repos and cache"
@@ -86,6 +89,11 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
 
+        --ask-password)
+            argAskPass=1
+            shift
+            ;;
+
         --no-init)
             argNoInit=1
             shift
@@ -115,9 +123,16 @@ fi
 echo "Running in [$dist_mode] mode..."
 
 # sanity checks
-if [ ! ${dist_mode} = "local" ];then
-    if [ -z "${argUser}" ] || [ -z "${argPass}" ];then
-        echo "${dist_mode} mode requires --user and --password"
+if [ ! ${dist_mode} = "local" ] && [ -z "${argNoInit}" ];then
+    if [ -z "${argUser}" ];then
+        echo "${dist_mode} mode requires --user"
+        exit 1
+    fi
+    if [ "${argAskPass}" ];then
+        read -r -s -p "Enter password for user '${argUser}': " argPass
+    fi
+    if [ -z "${argPass}" ];then
+        echo "No or empty credentials specified"
         exit 1
     fi
 fi

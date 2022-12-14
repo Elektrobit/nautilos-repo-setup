@@ -26,6 +26,7 @@ set -e
 ARGUMENT_LIST=(
     "user:"
     "password:"
+    "ask-password"
     "production:"
 )
 
@@ -45,6 +46,8 @@ if ! opts=$(getopt \
     echo "      Artifactory User Name"
     echo "  --password"
     echo "      User password"
+    echo "  --ask-password"
+    echo "      Ask for credentials"
     echo "  --production <release_date>"
     echo "      Fetch from EB production artifactory server for"
     echo "      given release date in format: YYYY-MM-DD"
@@ -63,6 +66,11 @@ while [[ $# -gt 0 ]]; do
         --password)
             argPass=$2
             shift 2
+            ;;
+
+        --ask-password)
+            argAskPass=1
+            shift
             ;;
 
         --production)
@@ -86,8 +94,9 @@ if [ -z "${argProduction}" ];then
     exit 1
 fi
 
-credentials="--ask-password"
-if [ -n "${argPass}" ];then
+if [ "${argAskPass}" ];then
+    credentials="--ask-password"
+else
     credentials="--password ${argPass}"
 fi
 

@@ -39,7 +39,5 @@ function add_repo {
 }
 
 function get_repo_server {
-    local user=$1
-    local secret=$2
-    echo "https://$user:$secret@$A_MACHINE/$A_DIST"
+    echo "https://$A_MACHINE/$A_DIST"
 }
