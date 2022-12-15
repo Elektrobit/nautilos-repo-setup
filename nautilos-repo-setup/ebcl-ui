@@ -64,22 +64,25 @@ function setup_dist {
         fi
         A_RELEASE=$(
             whiptail --radiolist "Select EBCL Distribution:" \
-                20 40 10 "${releases[@]}" Testing "" "${test_flag}" \
+                20 40 10 "${releases[@]}" \
+                Testing "" "${test_flag}" \
+                Local "" off \
                 3>&1 1>&2 2>&3
         )
     fi
     if [ "${A_RELEASE}" = Testing ];then
         A_DIST="${A_PRJ_TESTING}"
+    elif [ "${A_RELEASE}" = Local ];then
+        DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
     else
         A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
     fi
-    DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
 }
 
 function setup_container_sdk {
     local repo_location=$1
     if [ "${repo_location}" = "local_repos" ];then
-        if [ -d "${DISTPATH}" ];then
+        if [ -n "${DISTPATH}" ];then
             sudo ebcl-repo-setup --local "${DISTPATH}"
         else
             whiptail --msgbox "No local repos available, mirror first !" 7 60
@@ -184,7 +187,7 @@ function get_credentials {
 }
 
 function install_nautilos_repo_setup {
-    if [ -d "${DISTPATH}" ];then
+    if [ -n "${DISTPATH}" ];then
         # shellcheck disable=SC2086
         sudo dpkg --install \
             ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/nautilos-repo-setup*
@@ -271,7 +274,7 @@ while true;do
             ;;
         2)
             if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-                if [ -d "${DISTPATH}" ];then
+                if [ -n "${DISTPATH}" ];then
                     setup_container_sdk "local_repos"
                 else
                     setup_container_sdk "remote_repos"
@@ -297,7 +300,7 @@ while true;do
                     fi
                     image_description="${image_store}/${image_description}"
                     if [ -d "${image_description}" ];then
-                        if [ -d "${DISTPATH}" ];then
+                        if [ -n "${DISTPATH}" ];then
                             build_image "${image_description}" "local_repos"
                         else
                             build_image "${image_description}" "remote_repos"
