@@ -24,8 +24,7 @@
 set -e
 
 ARGUMENT_LIST=(
-    "user:"
-    "password:"
+    "credentials:"
     "ask-password"
     "production:"
 )
@@ -42,10 +41,8 @@ if ! opts=$(getopt \
     -- "$@"
 ); then
     echo "ebcl-sync"
-    echo "  --user"
-    echo "      Artifactory User Name"
-    echo "  --password"
-    echo "      User password"
+    echo "  --credentials <filename>"
+    echo "      Credentials file, will be deleted after call"
     echo "  --ask-password"
     echo "      Ask for credentials"
     echo "  --production <release_date>"
@@ -58,13 +55,8 @@ eval set --"${opts}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --user)
-            argUser=$2
-            shift 2
-            ;;
-
-        --password)
-            argPass=$2
+        --credentials)
+            argCred=$2
             shift 2
             ;;
 
@@ -84,30 +76,29 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [ -z "${argUser}" ];then
-    echo "No user name specified, try --user"
-    exit 1
-fi
-
 if [ -z "${argProduction}" ];then
     echo "No release date specified, try --production YYYY-MM-DD"
     exit 1
 fi
 
-if [ "${argAskPass}" ];then
-    credentials="--ask-password"
+options=""
+if [ "${argAskPass}" ] || [ -z "${argCred}" ];then
+    read -r -s -p "Enter Artifactory Username: " inUser
+    echo
+    options="--user ${inUser} --ask-password"
 else
-    credentials="--password ${argPass}"
+    mv "${argCred}" ~/.wgetrc
+    trap "rm -f ~/.wgetrc" EXIT
 fi
 
 RELEASE="${REMOTE}/${DIST}/${argProduction}/release/"
 
 mkdir -p "${LOCAL}"
+sudo chmod -R 777 "${LOCAL}"
 pushd "${LOCAL}"
 
 # shellcheck disable=SC2086
-wget --user "${argUser}" ${credentials} \
-    --mirror --recursive --no-parent --convert-links "${RELEASE}"
+wget ${options} --mirror --recursive --no-parent --convert-links "${RELEASE}"
 
 find . -name index.html -0 | xargs rm -f
 

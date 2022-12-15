@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 15 16:29:06 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Read credentials from files, never pass to cmdline
+
+-------------------------------------------------------------------
 Wed Dec 14 13:21:42 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Support ask for credentials in all ebcl- tools
