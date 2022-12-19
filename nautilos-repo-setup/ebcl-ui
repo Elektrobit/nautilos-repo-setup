@@ -73,7 +73,10 @@ function setup_dist {
     if [ "${A_RELEASE}" = Testing ];then
         A_DIST="${A_PRJ_TESTING}"
     elif [ "${A_RELEASE}" = Local ];then
-        DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_DIST}"
+        DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_PRJ_PRODUCTION}"
+        # shellcheck disable=SC2012
+        LATEST=$(ls -1t "${DISTPATH}" | head -n1)
+        DISTPATH="${DISTPATH}/${LATEST}"
     else
         A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
     fi
