@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jan 11 14:09:48 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Fix menu creation
+    
+  Don't show the selection for creating a local mirror if the
+  initial product selection was set to 'Local'
+
+-------------------------------------------------------------------
 Thu Dec 15 16:29:06 UTC 2022 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Read credentials from files, never pass to cmdline
