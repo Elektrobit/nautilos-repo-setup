@@ -131,6 +131,8 @@ function build_image {
 
     if [[ ${image_description} =~ /nxp ]];then
         ebcl_build=ebcl-build-arm64
+    elif [[ ${image_description} =~ /rpi ]];then
+        ebcl_build=ebcl-build-arm64
     else
         ebcl_build=ebcl-build-amd64
     fi
@@ -161,13 +163,30 @@ function get_releases_for_selection {
 
 function get_image_descriptions_for_selection {
     local selected=on
+    local have_ebcl_build_amd64
+    local have_ebcl_build_arm64
+    have_ebcl_build_amd64=$(type -p ebcl-build-amd64)
+    have_ebcl_build_arm64=$(type -p ebcl-build-arm64)
     echo -n "descriptions=( "
     pushd /usr/share/kiwi/nautilos/ &>/dev/null
     find . -maxdepth 3 -name build -print0 | \
     while read -r -d $'\0' build; do
         desc=$(dirname "${build}" | cut -f2- -d '/')
-        echo -n "${desc} \"\" ${selected} "
-        selected=off
+        buildable=""
+        if [ -n "${have_ebcl_build_amd64}" ];then
+            if [[ ${desc} =~ /x86 ]];then
+                buildable=yes
+            fi
+        fi
+        if [ -n "${have_ebcl_build_arm64}" ];then
+            if [[ ${desc} =~ /nxp ]] || [[ ${desc} =~ /rpi ]];then
+                buildable=yes
+            fi
+        fi
+        if [ -n "${buildable}" ]; then
+            echo -n "${desc} \"\" ${selected} "
+            selected=off
+        fi
     done
     echo ")"
     popd &>/dev/null
