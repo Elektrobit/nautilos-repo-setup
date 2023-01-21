@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sat Jan 21 19:22:14 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- install reference descriptions matching dist selection
+
+  At the selection of the distribution release it is important to
+  install the image description packages that matches this selection.
+
+-------------------------------------------------------------------
 Sat Jan 21 18:16:12 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Do not allow to run SDK setup twice

@@ -111,9 +111,6 @@ function setup_container_sdk {
         rm -f "${cred_out}"
     fi
 
-    sudo apt --yes install reference-image-description-crinit
-    sudo apt --yes install reference-image-description-jammy
-
     sudo apt --yes install oci-pilot
     sudo apt --yes install nautilos-builder-oci-flake
 
@@ -242,6 +239,29 @@ function install_nautilos_repo_setup {
         sudo apt update
         # shellcheck disable=SC2012
         sudo apt --yes install "./$(ls -1t nautilos-repo-setup* | head -n1)"
+        sudo rm -f ./nautilos-repo-setup*.deb
+    fi
+}
+
+function install_reference_description {
+    local package_name=$1
+    sudo dpkg --remove "${package_name}"
+    if [ -n "${DISTPATH}" ];then
+        # shellcheck disable=SC2086
+        sudo dpkg --install \
+            ${DISTPATH}/release/xUbuntu_22.04_debbuild/all/${package_name}*
+    else
+        echo -e "user=${credentials[0]}\npassword=${credentials[1]}" \
+            > ~/.wgetrc
+        # shellcheck disable=SC2086
+        wget --recursive --no-directories \
+            --no-parent -A "${package_name}*.deb" \
+            https://${A_MACHINE}/${A_DIST}/release/xUbuntu_22.04_debbuild/all/
+        rm -f ~/.wgetrc
+        # shellcheck disable=SC2012
+        sudo dpkg --install \
+            "./$(ls -1t "${package_name}"* | head -n1)"
+        sudo rm -f ./"${package_name}"*.deb
     fi
 }
 
@@ -297,6 +317,10 @@ if ! dpkg -s nautilos-repo-setup &>/dev/null;then
     fi
     exec /usr/bin/ebcl-ui "${A_RELEASE}"
 fi
+
+# install reference descriptions matching dist selection
+install_reference_description reference-image-description-crinit
+install_reference_description reference-image-description-jammy
 
 # main loop
 while true;do
