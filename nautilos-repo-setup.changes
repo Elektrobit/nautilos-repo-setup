@@ -1,4 +1,28 @@
 -------------------------------------------------------------------
+Sat Jan 21 15:06:25 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+-  Store credentials in ~/.config/ebcl-ui.conf
+
+-------------------------------------------------------------------
+Sat Jan 21 15:06:25 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+-  Check Local selection
+    
+   If Local is selected check if there are local repos available.
+   If not print an error message and go back to the dist
+   selection
+
+-------------------------------------------------------------------
+Sat Jan 21 15:06:25 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+-  Show SDK setup menu entry only if not already done
+
+-------------------------------------------------------------------
+Sat Jan 21 15:06:25 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+-  Only show images that can be build
+
+-------------------------------------------------------------------
 Wed Jan 11 14:09:48 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Fix menu creation
