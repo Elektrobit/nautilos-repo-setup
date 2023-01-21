@@ -283,8 +283,6 @@ fi
 # main loop
 while true;do
     declare -a main_menu
-    main_menu[2]="Run SDK Setup"
-    main_menu[3]=""
     main_menu[4]="Build Reference Image(s)"
     main_menu[5]=""
     main_menu[6]="Exit"
@@ -292,6 +290,10 @@ while true;do
     if [ "${A_RELEASE}" != "Local" ];then
         main_menu[0]="Create/Update Local Repository Mirror"
         main_menu[1]=""
+    fi
+    if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
+        main_menu[2]="Run SDK Setup"
+        main_menu[3]=""
     fi
     menu_selection=$(
         whiptail --menu "EBCL SDK" 15 50 5 "${main_menu[@]}" 3>&1 1>&2 2>&3
@@ -301,14 +303,10 @@ while true;do
             create_update_local_repo_mirror
             ;;
         "Run SDK Setup")
-            if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
-                if [ -n "${DISTPATH}" ];then
-                    setup_container_sdk "local_repos"
-                else
-                    setup_container_sdk "remote_repos"
-                fi
+            if [ -n "${DISTPATH}" ];then
+                setup_container_sdk "local_repos"
             else
-                whiptail --msgbox "SDK already configured" 7 60
+                setup_container_sdk "remote_repos"
             fi
             ;;
         "Build Reference Image(s)")
