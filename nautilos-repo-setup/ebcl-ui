@@ -55,31 +55,39 @@ function get_ebcl_releases {
 function setup_dist {
     local release=$1
     local test_flag=off
-    if [ -n "${release}" ];then
-        A_RELEASE="${release}"
-    else
-        eval "$(get_releases_for_selection)"
-        if [ -z "${releases[*]}" ];then
-            test_flag=on
+    while true; do
+        if [ -n "${release}" ];then
+            A_RELEASE="${release}"
+        else
+            eval "$(get_releases_for_selection)"
+            if [ -z "${releases[*]}" ];then
+                test_flag=on
+            fi
+            A_RELEASE=$(
+                whiptail --radiolist "Select EBCL Distribution:" \
+                    20 40 10 "${releases[@]}" \
+                    Testing "" "${test_flag}" \
+                    Local "" off \
+                    3>&1 1>&2 2>&3
+            )
         fi
-        A_RELEASE=$(
-            whiptail --radiolist "Select EBCL Distribution:" \
-                20 40 10 "${releases[@]}" \
-                Testing "" "${test_flag}" \
-                Local "" off \
-                3>&1 1>&2 2>&3
-        )
-    fi
-    if [ "${A_RELEASE}" = Testing ];then
-        A_DIST="${A_PRJ_TESTING}"
-    elif [ "${A_RELEASE}" = Local ];then
-        DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_PRJ_PRODUCTION}"
-        # shellcheck disable=SC2012
-        LATEST=$(ls -1t "${DISTPATH}" | head -n1)
-        DISTPATH="${DISTPATH}/${LATEST}"
-    else
-        A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
-    fi
+        if [ "${A_RELEASE}" = Testing ];then
+            A_DIST="${A_PRJ_TESTING}"
+        elif [ "${A_RELEASE}" = Local ];then
+            DISTPATH="/var/tmp/nautilos/${A_MACHINE}/${A_PRJ_PRODUCTION}"
+            if [ ! -d "${DISTPATH}" ];then
+                whiptail --msgbox \
+                    "No local repos available, mirror first !" 7 60
+                continue
+            fi
+            # shellcheck disable=SC2012
+            LATEST=$(ls -1t "${DISTPATH}" | head -n1)
+            DISTPATH="${DISTPATH}/${LATEST}"
+        else
+            A_DIST="${A_PRJ_PRODUCTION}/${A_RELEASE}"
+        fi
+        return
+    done
 }
 
 function setup_container_sdk {
