@@ -203,15 +203,25 @@ function get_image_descriptions_for_selection {
 function get_credentials {
     local user="${credentials[0]}"
     local secret="${credentials[1]}"
+    local secret_file="${HOME}/.config/ebcl-ui.conf"
     if [ -z "${user}" ] && [ -z "${secret}" ];then
-        user=$(
-            whiptail --passwordbox "Enter Artifactory User Name:" 8 60 \
-            3>&1 1>&2 2>&3
-        )
-        secret=$(
-            whiptail --passwordbox "Enter Artifactory Password:" 8 60 \
-            3>&1 1>&2 2>&3
-        )
+        if [ -f "${secret_file}" ];then
+            user=$(head -n1 "${secret_file}")
+            secret=$(tail -n1 "${secret_file}")
+        else
+            user=$(
+                whiptail --inputbox "Enter Artifactory User Name:" 8 60 \
+                3>&1 1>&2 2>&3
+            )
+            secret=$(
+                whiptail --passwordbox "Enter Artifactory Password:" 8 60 \
+                3>&1 1>&2 2>&3
+            )
+            mkdir -p "${HOME}/.config"
+            echo "${user}" > "${secret_file}"
+            echo "${secret}" >> "${secret_file}"
+            chmod 600 "${secret_file}"
+        fi
     fi
     eval "export credentials=( \"${user}\" \"${secret}\" )"
 }
@@ -304,7 +314,8 @@ while true;do
         main_menu[3]=""
     fi
     menu_selection=$(
-        whiptail --menu "EBCL SDK" 15 50 5 "${main_menu[@]}" 3>&1 1>&2 2>&3
+        whiptail --nocancel --menu \
+            "EBCL SDK" 15 50 5 "${main_menu[@]}" 3>&1 1>&2 2>&3
     )
     case "${menu_selection}" in
         "Create/Update Local Repository Mirror")
