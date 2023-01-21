@@ -322,10 +322,14 @@ while true;do
             create_update_local_repo_mirror
             ;;
         "Run SDK Setup")
-            if [ -n "${DISTPATH}" ];then
-                setup_container_sdk "local_repos"
+            if [ -z "$(ls -1 /usr/bin/ebcl-build* 2>/dev/null)" ];then
+                if [ -n "${DISTPATH}" ];then
+                    setup_container_sdk "local_repos"
+                else
+                    setup_container_sdk "remote_repos"
+                fi
             else
-                setup_container_sdk "remote_repos"
+                whiptail --msgbox "SDK already configured" 7 60
             fi
             ;;
         "Build Reference Image(s)")

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jan 21 18:16:12 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Do not allow to run SDK setup twice
+
+-------------------------------------------------------------------
 Sat Jan 21 15:06:25 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 -  Store credentials in ~/.config/ebcl-ui.conf
