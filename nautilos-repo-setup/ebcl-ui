@@ -30,6 +30,7 @@ declare -x target_dir
 declare -x cred_out
 
 export TERM=xterm
+export DEBIAN_FRONTEND=noninteractive
 
 A_MACHINE=artifactory.elektrobit.com
 A_PRJ_TESTING=eb_corbos_linux_nautilos2.0-debian-remote
