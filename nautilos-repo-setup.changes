@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 31 10:45:16 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
+
+- Make sure bootstrap-root-ubuntu-jammy is deleted to allow switching
+  between different releases
+
+-------------------------------------------------------------------
 Sat Jan 21 19:22:14 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - install reference descriptions matching dist selection

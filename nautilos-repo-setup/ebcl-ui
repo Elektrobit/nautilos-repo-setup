@@ -246,6 +246,7 @@ function install_nautilos_repo_setup {
 
 function install_reference_description {
     local package_name=$1
+    sudo dpkg --remove bootstrap-root-ubuntu-jammy
     sudo dpkg --remove "${package_name}"
     if [ -n "${DISTPATH}" ];then
         # shellcheck disable=SC2086
@@ -322,6 +323,7 @@ fi
 # install reference descriptions matching dist selection
 install_reference_description reference-image-description-crinit
 install_reference_description reference-image-description-jammy
+install_reference_description reference-image-description-container-app
 
 # main loop
 while true;do
