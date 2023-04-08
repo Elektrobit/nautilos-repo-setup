@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Apr  8 19:04:00 UTC 2023 - Marcus Schäfer <marcus.schaefer@gmail.com>
+
+- Provide ebcl-build-box vor VM based builds
+
+-------------------------------------------------------------------
 Tue Jan 31 10:45:16 UTC 2023 - Marcus Schäfer <marcus.schaefer@elektrobit.com>
 
 - Make sure bootstrap-root-ubuntu-jammy is deleted to allow switching
