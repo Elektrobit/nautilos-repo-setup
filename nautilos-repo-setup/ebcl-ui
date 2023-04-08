@@ -121,6 +121,16 @@ function setup_container_sdk {
         sudo apt --yes -o Dpkg::Options::="--force-architecture" \
             install elektrobit-arm64-sdk-image:arm64
     fi
+
+    if [ "$(arch)" = "x86_64" ];then
+        # support ebcl-build-box for VM based cross image building
+        sudo apt --yes install \
+            python3-kiwi-boxed-plugin qemu-kvm qemu-system-x86 qemu-system-arm
+        sudo cp \
+            /usr/share/kiwi/nautilos/reference-image-description-crinit/nxp/build \
+            /usr/bin/ebcl-build-box
+        sudo chmod 755 /usr/bin/ebcl-build-box
+    fi
 }
 
 function build_image {
