@@ -31,11 +31,16 @@ function add_repo {
     local A_PRJ=$1
     local user=$2
     local secret=$3
+    local source_file_name
     add_repo_key "$A_PRJ" "${user}" "${secret}"
-    # shellcheck disable=SC2024
-    sudo echo \
-        "deb https://$A_MACHINE/$A_DIST/$A_PRJ/ /" \
-        >> /etc/apt/sources.list.d/nautilos.list
+    source_file_name=$(echo "$A_PRJ" | tr "/" "_")
+    cat >/etc/apt/sources.list.d/"${source_file_name}".sources <<- EOF
+		Types: deb
+		URIs: https://$A_MACHINE/$A_DIST/$A_PRJ/
+		Suites: ./
+		trusted: yes
+		check-valid-until: no
+	EOF
 }
 
 function get_repo_server {
