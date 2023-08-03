@@ -92,12 +92,20 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [ -z "${version}" ];then
+    echo "version number not found, use for example --version 2"
+    exit 1
+fi
+
+if [ -z "${phase}" ];then
+    echo "phash number not found, use for example --phase gm"
+    exit 1
+fi
 
 echo "Setup ${A_PRODUCT} repositories..."
 clean_repo
 
 # corbos public repositories
-echo ${dist_mode}
 add_repo "${version}" "${phase}" containers
 add_repo "${version}" "${phase}" xUbuntu_22.04_debbuild
 
